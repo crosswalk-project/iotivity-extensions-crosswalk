@@ -1,0 +1,53 @@
+#!/bin/bash
+# Copyright (c) 2013 Intel Corporation. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+if [ ! `which cpplint.py` ]; then
+   echo -e "\nPlease make sure cpplint.py is in your PATH. It is part of depot_tools inside Chromium repository."
+   exit 1
+fi
+
+if [ ! `which gjslint` ]; then
+   echo -e "\nPlease make sure gjslint (Google Closure Lint) is in your PATH."
+   echo -e "You can install it directly by \"sudo easy_install-2.7 http://closure-linter.googlecode.com/files/closure_linter-latest.tar.gz\"."
+   echo -e "Or visit https://developers.google.com/closure/utilities/docs/linter_howto for more information.\n"
+   exit 1
+fi
+
+# Store current dir and change to repository root dir.
+OLD_PWD=$PWD
+SELF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $SELF_DIR/..
+
+# FIXME(cmarcelo): the exception 'runtime/references' is for system_info/, we
+# need to verify whether is really necessary or should be fixed.
+FILTERS="-readability/streams,-runtime/references"
+
+# TODO(cmarcelo): Skipping directories so we can enable style
+# gradually, since it wasn't enforced before.
+cpplint.py --root=src --filter="$FILTERS" $(find . \
+                               ! -path './out*' ! -path './.git*' \
+                               ! -path './demos' ! -path './examples' \
+                               ! -path './packaging' \
+                               ! -name 'XW_Extension*.h' \
+                               ! -name 'picojson.*' \
+                               \( -name '*.h' -o -name '*.cc' \) )
+CPP_RET_VAL=$?
+
+gjslint --strict --nojsdoc --max_line_length 100 --unix_mode $(find . \
+                               ! -path './out*' ! -path './.git*' \
+                               ! -path './packaging' \
+                               ! -name 'jquery*' \
+                               ! -name 'flotr2.*' \
+                               -name '*.js' )
+
+# Return to previous dir and return the code returned by cpplint.py
+JS_RET_VAL=$?
+cd $OLD_PWD
+
+if [ "x$CPP_RET_VAL" = "x0" -a "x$JS_RET_VAL" = "x0" ]; then
+  exit 0
+else
+  exit 1
+fi

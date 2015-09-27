@@ -47,7 +47,7 @@ build_iotivity: prepare
 
 install:libiotivity-extension.so
 	install -D build/libiotivity-extension.so \
-        $(DESTDIR)/libiotiviity-extension.so
+        $(DESTDIR)/libiotivity-extension.so
 
 clean:
 	rm -Rf build

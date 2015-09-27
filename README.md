@@ -3,15 +3,25 @@ The IoTivity extensions project implements the IoTivity Web APIs on top of the C
 
 ## Build Instructions
 Build requires:
-* IotTivity
-* Crosswalk 
-* boost-devel
-* python
+* IoTivity
+* Python-2.7
 
 Build commands:
+To rebuild IoTivity with the extension:
+```
+$ IOTIVITY_REBUILD=true make
+$ make install DESTDIR=<lib output dir>
+```
+
+Or, if IoTvity is already available, just do :
 ```
 $ make
 $ make install DESTDIR=<lib output dir>
+```
+
+For details:
+```
+$ make help
 ```
 
 Example for Tizen build available in `tools/tizen/iotivity-extensions-crosswalk.spec` 

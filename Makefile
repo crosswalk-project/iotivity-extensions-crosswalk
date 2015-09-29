@@ -90,3 +90,4 @@ help:
 	@echo '  Default: empty, default lib search path used'
 	@echo ''
 
+.PHONY: all build_iotivity clean help install prepare

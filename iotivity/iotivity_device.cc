@@ -99,24 +99,29 @@ void IotivityDeviceSettings::deserialize(const picojson::value& value) {
 }
 
 IotivityDevice::IotivityDevice(common::Instance* instance)
-    : m_instance(instance) {
-  m_server = new IotivityServer(this);
-  m_client = new IotivityClient(this);
-}
+  : IotivityDevice(instance, NULL) {}
 
 IotivityDevice::IotivityDevice(common::Instance* instance,
                                IotivityDeviceSettings* settings) {
   m_instance = instance;
-  m_server = new IotivityServer(this);
-  m_client = new IotivityClient(this);
 
-  if (settings == NULL) {
-    // Set default
-    configure(NULL);
-  } else {
-    configure(settings);
-    configurePlatformInfo(settings->m_deviceInfo);
-    configureDeviceInfo(settings->m_deviceInfo);
+  configure(settings);
+
+  if (settings != NULL) {
+    DEBUG_MSG("IotivityDevice:: settings client_mode = %s\n",
+              settings->m_role.c_str());
+
+    if (settings->m_role != "client") {
+      OCStackResult result = configurePlatformInfo(settings->m_deviceInfo);
+
+      if (OC_STACK_OK != result)
+        throw OCException(OC::InitException::GENERAL_FAULT);
+
+      result = configureDeviceInfo(settings->m_deviceInfo);
+
+      if (OC_STACK_OK != result)
+        throw OCException(OC::InitException::GENERAL_FAULT);
+    }
   }
 }
 
@@ -155,12 +160,12 @@ void DeleteDeviceInfo(OCDeviceInfo& deviceInfo) {
 }
 
 static OCStackResult SetPlatformInfo(
-    OCPlatformInfo& platformInfo, std::string platformID,
-    std::string manufacturerName, std::string manufacturerUrl,
-    std::string modelNumber, std::string dateOfManufacture,
-    std::string platformVersion, std::string operatingSystemVersion,
-    std::string hardwareVersion, std::string firmwareVersion,
-    std::string supportUrl, std::string systemTime) {
+  OCPlatformInfo& platformInfo, std::string platformID,
+  std::string manufacturerName, std::string manufacturerUrl,
+  std::string modelNumber, std::string dateOfManufacture,
+  std::string platformVersion, std::string operatingSystemVersion,
+  std::string hardwareVersion, std::string firmwareVersion,
+  std::string supportUrl, std::string systemTime) {
   DuplicateString(&platformInfo.platformID, platformID);
   DuplicateString(&platformInfo.manufacturerName, manufacturerName);
   DuplicateString(&platformInfo.manufacturerUrl, manufacturerUrl);
@@ -195,16 +200,21 @@ void IotivityDevice::configure(IotivityDeviceSettings* settings) {
 
     if (settings->m_role == "server") {
       modeType = OC::ModeType::Server;
+      m_server = new IotivityServer(this);
     } else if (settings->m_role == "client") {
       modeType = OC::ModeType::Client;
+      m_client = new IotivityClient(this);
     } else {
       modeType = OC::ModeType::Both;
+      m_client = new IotivityClient(this);
+      m_server = new IotivityServer(this);
     }
 
     if (settings->m_url != "") {
       std::string tmp = settings->m_url;
       std::string delimiter = ":";
       size_t pos = tmp.find(delimiter);
+
       if (pos != std::string::npos) {
         host = tmp.substr(0, pos);
         std::string portString = tmp.substr(pos + 1, tmp.length());
@@ -212,10 +222,7 @@ void IotivityDevice::configure(IotivityDeviceSettings* settings) {
         port = atoi(portString.c_str());
       }
     }
-  } else {
-    // Apply default
   }
-
   // By setting to "0.0.0.0", it binds to all available interfaces
   // Uses randomly available port
   PlatformConfig cfg{ServiceType::InProc, modeType, host.c_str(), 0, QoS};
@@ -228,7 +235,7 @@ void IotivityDevice::configure(IotivityDeviceSettings* settings) {
 }
 
 OCStackResult IotivityDevice::configurePlatformInfo(
-    IotivityDeviceInfo& deviceInfo) {
+  IotivityDeviceInfo& deviceInfo) {
   OCStackResult result = OC_STACK_ERROR;
   OCPlatformInfo platformInfo = {0};
 
@@ -255,30 +262,32 @@ OCStackResult IotivityDevice::configurePlatformInfo(
   if (systemTime == "") systemTime = "default";
 
   DEBUG_MSG(
-      "registerPlatformInfo:\n"
-      "\tID:          %s\n"
-      "\tmodelNumber: %s\n"
-      "\tmanufName:   %s\n"
-      "\tmanufUrl:    %s\n"
-      "\tmanufDate:   %s\n",
-      platformID.c_str(), modelNumber.c_str(), manufacturerName.c_str(),
-      manufacturerUrl.c_str(), manufactureDate.c_str());
+    "registerPlatformInfo:\n"
+    "\tID:          %s\n"
+    "\tmodelNumber: %s\n"
+    "\tmanufName:   %s\n"
+    "\tmanufUrl:    %s\n"
+    "\tmanufDate:   %s\n",
+    platformID.c_str(), modelNumber.c_str(), manufacturerName.c_str(),
+    manufacturerUrl.c_str(), manufactureDate.c_str());
 
   DEBUG_MSG(
-      "\tplatform:    %s\n"
-      "\tOS:          %s\n"
-      "\thw:          %s\n"
-      "\tfw:          %s\n"
-      "\turl:         %s\n"
-      "\ttime:        %s\n",
-      platformVersion.c_str(), operatingSystemVersion.c_str(),
-      hardwareVersion.c_str(), firmwareVersion.c_str(), supportUrl.c_str(),
-      systemTime.c_str());
+    "\tplatform:    %s\n"
+    "\tOS:          %s\n"
+    "\thw:          %s\n"
+    "\tfw:          %s\n"
+    "\turl:         %s\n"
+    "\ttime:        %s\n",
+    platformVersion.c_str(), operatingSystemVersion.c_str(),
+    hardwareVersion.c_str(), firmwareVersion.c_str(), supportUrl.c_str(),
+    systemTime.c_str());
 
   result = SetPlatformInfo(
-      platformInfo, platformID, manufacturerName, manufacturerUrl, modelNumber,
-      manufactureDate, platformVersion, operatingSystemVersion, hardwareVersion,
-      firmwareVersion, supportUrl, systemTime);
+             platformInfo, platformID, manufacturerName,
+             manufacturerUrl, modelNumber,
+             manufactureDate, platformVersion,
+             operatingSystemVersion, hardwareVersion,
+             firmwareVersion, supportUrl, systemTime);
   if (OC_STACK_OK != result) {
     ERROR_MSG("Platform Registration was unsuccessful\n");
     return result;
@@ -296,7 +305,7 @@ OCStackResult IotivityDevice::configurePlatformInfo(
 }
 
 OCStackResult IotivityDevice::configureDeviceInfo(
-    IotivityDeviceInfo& deviceInfo) {
+  IotivityDeviceInfo& deviceInfo) {
   OCStackResult result = OC_STACK_ERROR;
   OCDeviceInfo oCDeviceInfo = {0};
 
@@ -327,9 +336,13 @@ void IotivityDevice::handleConfigure(const picojson::value& value) {
   IotivityDeviceSettings deviceSettings;
   deviceSettings.deserialize(value.get("settings"));
 
+  if (deviceSettings.m_role == "client")
+    return;
+
   configure(&deviceSettings);
 
   OCStackResult result = configurePlatformInfo(deviceSettings.m_deviceInfo);
+
   if (OC_STACK_OK != result) {
     ERROR_MSG("Platform Info Registration was unsuccessful\n");
     postError(async_call_id);
@@ -337,6 +350,7 @@ void IotivityDevice::handleConfigure(const picojson::value& value) {
   }
 
   result = configureDeviceInfo(deviceSettings.m_deviceInfo);
+
   if (OC_STACK_OK != result) {
     ERROR_MSG("Device Info Registration was unsuccessful\n");
     postError(async_call_id);

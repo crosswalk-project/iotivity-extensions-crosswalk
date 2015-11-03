@@ -321,7 +321,7 @@ OicClient.prototype.retrieveResource = function(resourceId) {
 
 OicClient.prototype.updateResource = function(resource) {
   return OicClient.prototype.updateResource(resource, false);
-}
+};
 
 OicClient.prototype.updateResource = function(resource, doPost) {
   var msg = {
@@ -339,7 +339,7 @@ OicClient.prototype.updateResource = function(resource, doPost) {
       'children': resource.children || null,
       'properties': resource.properties
     },
-    'doPost': doPost,
+    'doPost': doPost
   };
   return createPromise(msg);
 };

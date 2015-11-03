@@ -66,7 +66,7 @@ void IotivityResourceInit::deserialize(const picojson::value& value) {
   m_resourceProperty = 0;
 
   picojson::array resourceTypes =
-      value.get("resourceTypes").get<picojson::array>();
+    value.get("resourceTypes").get<picojson::array>();
 
   for (picojson::array::iterator iter = resourceTypes.begin();
        iter != resourceTypes.end(); ++iter) {
@@ -156,8 +156,8 @@ void IotivityResourceInit::serialize(picojson::object& object) {
 }
 
 IotivityResourceServer::IotivityResourceServer(
-    IotivityDevice* device, IotivityResourceInit* oicResource)
-    : m_device(device) {
+  IotivityDevice* device, IotivityResourceInit* oicResource)
+  : m_device(device) {
   m_oicResourceInit = oicResource;
   m_resourceHandle = 0;
 }
@@ -183,7 +183,7 @@ ObservationIds& IotivityResourceServer::getObserversList() {
 }
 
 OCEntityHandlerResult IotivityResourceServer::entityHandlerCallback(
-    std::shared_ptr<OCResourceRequest> request) {
+  std::shared_ptr<OCResourceRequest> request) {
   DEBUG_MSG("\n\n[Remote Client==>] entityHandlerCallback:\n");
 
   OCEntityHandlerResult ehResult = OC_EH_ERROR;
@@ -208,9 +208,9 @@ OCEntityHandlerResult IotivityResourceServer::entityHandlerCallback(
       } else if (ObserveAction::ObserveUnregister == observationInfo.action) {
         DEBUG_MSG("postEntityHandler:ObserveUnregister\n");
         m_interestedObservers.erase(
-            std::remove(m_interestedObservers.begin(),
-                        m_interestedObservers.end(), observationInfo.obsId),
-            m_interestedObservers.end());
+          std::remove(m_interestedObservers.begin(),
+                      m_interestedObservers.end(), observationInfo.obsId),
+          m_interestedObservers.end());
       }
     }
 
@@ -243,14 +243,14 @@ void IotivityResourceServer::serialize(picojson::object& object) {
 OCStackResult IotivityResourceServer::registerResource() {
   OCStackResult result = OC_STACK_ERROR;
   EntityHandler resourceCallback =
-      std::bind(&IotivityResourceServer::entityHandlerCallback, this,
-                std::placeholders::_1);
+    std::bind(&IotivityResourceServer::entityHandlerCallback, this,
+              std::placeholders::_1);
 
   result = OCPlatform::registerResource(
-      m_resourceHandle, m_oicResourceInit->m_url,
-      m_oicResourceInit->m_resourceTypeName,
-      m_oicResourceInit->m_resourceInterface, resourceCallback,
-      m_oicResourceInit->m_resourceProperty);
+             m_resourceHandle, m_oicResourceInit->m_url,
+             m_oicResourceInit->m_resourceTypeName,
+             m_oicResourceInit->m_resourceInterface, resourceCallback,
+             m_oicResourceInit->m_resourceProperty);
 
   if (OC_STACK_OK != result) {
     ERROR_MSG("registerResource was unsuccessful\n");
@@ -264,20 +264,21 @@ OCStackResult IotivityResourceServer::registerResource() {
   m_idfull = std::to_string(getResourceHandleToInt());
 
   if (m_oicResourceInit->m_resourceTypeNameArray.size() >= 2) {
-    for (unsigned int i = 1; i < m_oicResourceInit->m_resourceTypeNameArray.size();
-         i++) {
+    for (unsigned int i = 1;
+          i < m_oicResourceInit->m_resourceTypeNameArray.size();
+          i++) {
       std::string resourceTypeName =
-          m_oicResourceInit->m_resourceTypeNameArray[i];
+        m_oicResourceInit->m_resourceTypeNameArray[i];
 
       DEBUG_MSG("bindTypeToResource=%s\n", resourceTypeName.c_str());
 
       result =
-          OCPlatform::bindTypeToResource(m_resourceHandle, resourceTypeName);
+        OCPlatform::bindTypeToResource(m_resourceHandle, resourceTypeName);
 
       if (OC_STACK_OK != result) {
         ERROR_MSG(
-            "bindTypeToResource TypeName "
-            "to Resource unsuccessful\n");
+          "bindTypeToResource TypeName "
+          "to Resource unsuccessful\n");
         return result;
       }
     }
@@ -287,12 +288,12 @@ OCStackResult IotivityResourceServer::registerResource() {
   if (iSize >= 2) {
     for (int i = 1; i < iSize; i++) {
       std::string resourceInterface =
-          m_oicResourceInit->m_resourceInterfaceArray[i];
+        m_oicResourceInit->m_resourceInterfaceArray[i];
 
       DEBUG_MSG("bindInterfaceToResource=%s\n", resourceInterface.c_str());
 
       result = OCPlatform::bindInterfaceToResource(m_resourceHandle,
-                                                   resourceInterface);
+               resourceInterface);
 
       if (OC_STACK_OK != result) {
         ERROR_MSG("Binding InterfaceName to Resource unsuccessful\n");
@@ -313,7 +314,7 @@ int IotivityResourceServer::getResourceHandleToInt() {
 std::string IotivityResourceServer::getResourceId() { return m_idfull; }
 
 IotivityResourceClient::IotivityResourceClient(IotivityDevice* device)
-    : m_device(device) {
+  : m_device(device) {
   m_ocResourcePtr = NULL;
   m_oicResourceInit = new IotivityResourceInit();
 }
@@ -330,7 +331,7 @@ const std::shared_ptr<OCResource> IotivityResourceClient::getSharedPtr() {
 }
 
 void IotivityResourceClient::setSharedPtr(
-    std::shared_ptr<OCResource> sharePtr) {
+  std::shared_ptr<OCResource> sharePtr) {
   m_ocResourcePtr = sharePtr;
   int* p = reinterpret_cast<int*>(sharePtr.get());
   int pint = reinterpret_cast<int>(p);
@@ -352,7 +353,7 @@ void IotivityResourceClient::setSharedPtr(
 
   for (auto& resourceInterfaces : sharePtr->getResourceInterfaces()) {
     m_oicResourceInit->m_resourceInterfaceArray.push_back(
-        resourceInterfaces.c_str());
+      resourceInterfaces.c_str());
   }
 }
 
@@ -454,9 +455,9 @@ void IotivityResourceClient::onObserve(const HeaderOptions headerOptions,
                                        const int& sequenceNumber,
                                        double asyncCallId) {
   DEBUG_MSG(
-      "\n\n[Remote Server==>] "
-      "onObserve: sequenceNumber=%d, eCode=%d, %f\n",
-      sequenceNumber, eCode, asyncCallId);
+    "\n\n[Remote Server==>] "
+    "onObserve: sequenceNumber=%d, eCode=%d, %f\n",
+    sequenceNumber, eCode, asyncCallId);
   picojson::value::object object;
   object["cmd"] = picojson::value("onObserve");
   object["eCode"] = picojson::value(static_cast<double>(eCode));
@@ -503,7 +504,7 @@ void IotivityResourceClient::onDelete(const HeaderOptions& headerOptions,
 }
 
 OCStackResult IotivityResourceClient::createResource(
-    IotivityResourceInit& oicResourceInit, double asyncCallId) {
+  IotivityResourceInit& oicResourceInit, double asyncCallId) {
   DEBUG_MSG("createResource %f\n", asyncCallId);
 
   OCStackResult result = OC_STACK_ERROR;
@@ -511,8 +512,8 @@ OCStackResult IotivityResourceClient::createResource(
   if (m_ocResourcePtr == NULL) return result;
 
   PostCallback attributeHandler =
-      std::bind(&IotivityResourceClient::onPost, this, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3, asyncCallId);
+    std::bind(&IotivityResourceClient::onPost, this, std::placeholders::_1,
+              std::placeholders::_2, std::placeholders::_3, asyncCallId);
   result = m_ocResourcePtr->post(oicResourceInit.m_resourceRep,
                                  QueryParamsMap(), attributeHandler);
   if (OC_STACK_OK != result) {
@@ -531,8 +532,8 @@ OCStackResult IotivityResourceClient::retrieveResource(double asyncCallId) {
   if (m_ocResourcePtr == NULL) return result;
 
   GetCallback attributeHandler =
-      std::bind(&IotivityResourceClient::onGet, this, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3, asyncCallId);
+    std::bind(&IotivityResourceClient::onGet, this, std::placeholders::_1,
+              std::placeholders::_2, std::placeholders::_3, asyncCallId);
   result = m_ocResourcePtr->get(QueryParamsMap(), attributeHandler);
   if (OC_STACK_OK != result) {
     ERROR_MSG("get was unsuccessful\n");
@@ -543,12 +544,13 @@ OCStackResult IotivityResourceClient::retrieveResource(double asyncCallId) {
 }
 
 OCStackResult IotivityResourceClient::updateResource(
-    OCRepresentation& representation, double asyncCallId) {
-  return IotivityResourceClient::updateResource(representation, asyncCallId, false);
+  OCRepresentation& representation, double asyncCallId) {
+  return IotivityResourceClient::updateResource(representation,
+                                                asyncCallId, false);
 }
 
 OCStackResult IotivityResourceClient::updateResource(
-    OCRepresentation& representation, double asyncCallId, bool doPost) {
+  OCRepresentation& representation, double asyncCallId, bool doPost) {
   DEBUG_MSG("updateResource %f\n", asyncCallId);
 
   OCStackResult result = OC_STACK_ERROR;
@@ -559,7 +561,7 @@ OCStackResult IotivityResourceClient::updateResource(
 
   if (doPost) {
     PostCallback attributeHandler =
-        std::bind(&IotivityResourceClient::onPost, this, std::placeholders::_1,
+      std::bind(&IotivityResourceClient::onPost, this, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3, asyncCallId);
     result =
       m_ocResourcePtr->post(representation, QueryParamsMap(), attributeHandler);
@@ -567,10 +569,9 @@ OCStackResult IotivityResourceClient::updateResource(
       ERROR_MSG("update was unsuccessful\n");
       return result;
     }
-  }
-  else {
+  } else {
     PutCallback attributeHandler =
-        std::bind(&IotivityResourceClient::onPut, this, std::placeholders::_1,
+      std::bind(&IotivityResourceClient::onPut, this, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3, asyncCallId);
     result =
       m_ocResourcePtr->put(representation, QueryParamsMap(), attributeHandler);
@@ -591,8 +592,8 @@ OCStackResult IotivityResourceClient::deleteResource(double asyncCallId) {
   if (m_ocResourcePtr == NULL) return result;
 
   DeleteCallback deleteHandler =
-      std::bind(&IotivityResourceClient::onDelete, this, std::placeholders::_1,
-                std::placeholders::_2, asyncCallId);
+    std::bind(&IotivityResourceClient::onDelete, this, std::placeholders::_1,
+              std::placeholders::_2, asyncCallId);
   result = m_ocResourcePtr->deleteResource(deleteHandler);
 
   if (OC_STACK_OK != result) {
@@ -611,9 +612,9 @@ OCStackResult IotivityResourceClient::startObserving(double asyncCallId) {
   if (m_ocResourcePtr == NULL) return result;
 
   ObserveCallback observeHandler =
-      std::bind(&IotivityResourceClient::onObserve, this, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3,
-                std::placeholders::_4, asyncCallId);
+    std::bind(&IotivityResourceClient::onObserve, this, std::placeholders::_1,
+              std::placeholders::_2, std::placeholders::_3,
+              std::placeholders::_4, asyncCallId);
 
   result = m_ocResourcePtr->observe(ObserveType::ObserveAll, QueryParamsMap(),
                                     observeHandler);
@@ -647,7 +648,7 @@ IotivityRequestEvent::IotivityRequestEvent() {}
 IotivityRequestEvent::~IotivityRequestEvent() {}
 
 void IotivityRequestEvent::deserialize(
-    std::shared_ptr<OCResourceRequest> request) {
+  std::shared_ptr<OCResourceRequest> request) {
   std::string requestType = request->getRequestType();
   int requestFlag = request->getRequestHandlerFlag();
   int requestHandle = (int)request->getRequestHandle();  // NOLINT
@@ -793,7 +794,7 @@ void IotivityRequestEvent::serialize(picojson::object& object) {
       DEBUG_MSG("HeaderOptions: ID=%d, value=%s\n", it->getOptionID(),
                 it->getOptionData().c_str());
       object[std::to_string(it->getOptionID()).c_str()] =
-          picojson::value(it->getOptionData());
+        picojson::value(it->getOptionData());
       headerOptionsArray.push_back(picojson::value(object));
     }
   }

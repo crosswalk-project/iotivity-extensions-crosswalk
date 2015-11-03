@@ -73,6 +73,7 @@ void UpdateOcRepresentation(const OCRepresentation &oCReprSource,
 void TranslateOCRepresentationToPicojson(
     const OCRepresentation &oCRepresentation, picojson::object &objectRes);
 void CopyInto(std::vector<std::string> &src, picojson::array &dest);
+int GetWait(picojson::value v);
 
 #ifdef __cplusplus
 }  // extern "C"

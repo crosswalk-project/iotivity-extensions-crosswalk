@@ -28,15 +28,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "iotivity/iotivity_tools.h"
+#include <sstream>
 
 char* pDebugEnv = NULL;
 
 void PrintfOcResource(const OCResource& oCResource) {
   DEBUG_MSG("PrintfOcResource\n");
-  DEBUG_MSG("Res[sId] = %s\n", oCResource.sid().c_str());
-  DEBUG_MSG("Res[Uri] = %s\n", oCResource.uri().c_str());
-  DEBUG_MSG("Res[Host] = %s\n", oCResource.host().c_str());
-  DEBUG_MSG("Res[Resource types] \n");
+  DEBUG_MSG("\tRes[sId] = %s\n", oCResource.sid().c_str());
+  DEBUG_MSG("\tRes[Uri] = %s\n", oCResource.uri().c_str());
+  DEBUG_MSG("\tRes[Host] = %s\n", oCResource.host().c_str());
+  DEBUG_MSG("\tRes[Resource types]:\n");
 
   for (const auto& resourceTypes : oCResource.getResourceTypes()) {
     DEBUG_MSG("\t\t%s\n", resourceTypes.c_str());
@@ -50,26 +51,36 @@ void PrintfOcResource(const OCResource& oCResource) {
 }
 
 void PrintfOcRepresentation(const OCRepresentation& oCRepr) {
-  DEBUG_MSG("PrintfOcRepresentation\n");
+  DEBUG_MSG("PrintfOcRepresentation:\n");
 
   std::string uri = oCRepr.getUri();
-  DEBUG_MSG("uri=%s\n", uri.c_str());
+  DEBUG_MSG("\turi=%s\n", uri.c_str());
+
+  DEBUG_MSG("\ttypes=%s\n", uri.c_str());
+  for (const auto& resourceTypes : oCRepr.getResourceTypes()) {
+    DEBUG_MSG("\t\t%s\n", resourceTypes.c_str());
+  }
+
+  DEBUG_MSG("\tinterfaces=%s\n", uri.c_str());
+  for (const auto& resourceInterfaces : oCRepr.getResourceInterfaces()) {
+    DEBUG_MSG("\t\t%s\n", resourceInterfaces.c_str());
+  }
 
   for (const auto& cur : oCRepr) {
     std::string attrname = cur.attrname();
 
     if (AttributeType::String == cur.type()) {
       std::string curStr = cur.getValue<string>();
-      DEBUG_MSG("Rep[String]: key=%s, value=%s\n", attrname.c_str(),
+      DEBUG_MSG("\tRep[String]: key=%s, value=%s\n", attrname.c_str(),
                 curStr.c_str());
     } else if (AttributeType::Integer == cur.type()) {
-      DEBUG_MSG("Rep[Integer]: key=%s, value=%d\n", attrname.c_str(),
+      DEBUG_MSG("\tRep[Integer]: key=%s, value=%d\n", attrname.c_str(),
                 cur.getValue<int>());
     } else if (AttributeType::Double == cur.type()) {
-      DEBUG_MSG("Rep[Double]: key=%s, value=%f\n", attrname.c_str(),
+      DEBUG_MSG("\tRep[Double]: key=%s, value=%f\n", attrname.c_str(),
                 cur.getValue<double>());
     } else if (AttributeType::Boolean == cur.type()) {
-      DEBUG_MSG("Rep[Boolean]: key=%s, value=%d\n", attrname.c_str(),
+      DEBUG_MSG("\tRep[Boolean]: key=%s, value=%d\n", attrname.c_str(),
                 cur.getValue<bool>());
     }
   }
@@ -234,4 +245,15 @@ void CopyInto(std::vector<std::string>& src, picojson::array& dest) {
     std::string str = src[i];
     dest.push_back(picojson::value(str));
   }
+}
+
+int GetWait(picojson::value value) {
+  picojson::value param = value.get("OicDiscoveryOptions");
+  int waitsec = 5;
+
+  if (param.contains("waitsec")) {
+    waitsec = static_cast<int>(param.get("waitsec").get<double>());
+  }
+
+  return waitsec;
 }

@@ -257,7 +257,7 @@ OCStackResult IotivityResourceServer::registerResource() {
     return result;
   }
 
-  DEBUG_MSG("registerResource handle=%d\n", m_resourceHandle);
+  DEBUG_MSG("registerResource handle=%f\n", m_resourceHandle);
 
   // TODO(aphao) should retrieve host IP + uri instead of int:
   // Missing C/C++ API to retrieve server resource's host url

@@ -382,7 +382,7 @@ void IotivityDevice::postResult(const char* completed_operation,
 }
 
 void IotivityDevice::postError(double async_operation_id) {
-  DEBUG_MSG("postError: id=%d\n", async_operation_id);
+  DEBUG_MSG("postError: id=%f\n", async_operation_id);
 
   picojson::value::object object;
   object["cmd"] = picojson::value("asyncCallError");

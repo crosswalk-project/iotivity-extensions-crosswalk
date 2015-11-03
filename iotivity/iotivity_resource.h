@@ -110,6 +110,7 @@ class IotivityResourceClient {
   explicit IotivityResourceClient(IotivityDevice* device);
   ~IotivityResourceClient();
 
+  const std::shared_ptr<OCResource> getSharedPtr();
   void setSharedPtr(std::shared_ptr<OCResource> sharePtr);
   int getResourceHandleToInt();
   std::string getResourceId();
@@ -133,6 +134,8 @@ class IotivityResourceClient {
   OCStackResult retrieveResource(double asyncCallId);
   OCStackResult updateResource(OCRepresentation& representation,
                                double asyncCallId);
+  OCStackResult updateResource(OCRepresentation& representation,
+                               double asyncCallId, bool doPost);
   OCStackResult deleteResource(double asyncCallId);
   OCStackResult startObserving(double asyncCallId);
   OCStackResult cancelObserving(double asyncCallId);

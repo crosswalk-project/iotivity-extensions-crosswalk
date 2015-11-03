@@ -331,12 +331,14 @@ void IotivityDevice::handleConfigure(const picojson::value& value) {
 
   OCStackResult result = configurePlatformInfo(deviceSettings.m_deviceInfo);
   if (OC_STACK_OK != result) {
+    ERROR_MSG("Platform Info Registration was unsuccessful\n");
     postError(async_call_id);
     return;
   }
 
   result = configureDeviceInfo(deviceSettings.m_deviceInfo);
   if (OC_STACK_OK != result) {
+    ERROR_MSG("Device Info Registration was unsuccessful\n");
     postError(async_call_id);
     return;
   }
@@ -350,14 +352,12 @@ static void systemReboot() {
 }
 
 void IotivityDevice::handleFactoryReset(const picojson::value& value) {
-  double async_call_id = value.get("asyncCallId").get<double>();
   // TODO(aphao)
   // Return to factory configuration
   systemReboot();
 }
 
 void IotivityDevice::handleReboot(const picojson::value& value) {
-  double async_call_id = value.get("asyncCallId").get<double>();
   // TODO(aphao)
   // Keep current configuration
   systemReboot();

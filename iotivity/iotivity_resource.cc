@@ -325,6 +325,10 @@ IotivityResourceClient::~IotivityResourceClient() {
   }
 }
 
+const std::shared_ptr<OCResource> IotivityResourceClient::getSharedPtr() {
+  return m_ocResourcePtr;
+}
+
 void IotivityResourceClient::setSharedPtr(
     std::shared_ptr<OCResource> sharePtr) {
   m_ocResourcePtr = sharePtr;
@@ -540,6 +544,11 @@ OCStackResult IotivityResourceClient::retrieveResource(double asyncCallId) {
 
 OCStackResult IotivityResourceClient::updateResource(
     OCRepresentation& representation, double asyncCallId) {
+  return IotivityResourceClient::updateResource(representation, asyncCallId, false);
+}
+
+OCStackResult IotivityResourceClient::updateResource(
+    OCRepresentation& representation, double asyncCallId, bool doPost) {
   DEBUG_MSG("updateResource %f\n", asyncCallId);
 
   OCStackResult result = OC_STACK_ERROR;
@@ -547,14 +556,28 @@ OCStackResult IotivityResourceClient::updateResource(
   if (m_ocResourcePtr == NULL) return result;
 
   PrintfOcRepresentation(representation);
-  PutCallback attributeHandler =
-      std::bind(&IotivityResourceClient::onPut, this, std::placeholders::_1,
+
+  if (doPost) {
+    PostCallback attributeHandler =
+        std::bind(&IotivityResourceClient::onPost, this, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3, asyncCallId);
-  result =
+    result =
+      m_ocResourcePtr->post(representation, QueryParamsMap(), attributeHandler);
+    if (OC_STACK_OK != result) {
+      ERROR_MSG("update was unsuccessful\n");
+      return result;
+    }
+  }
+  else {
+    PutCallback attributeHandler =
+        std::bind(&IotivityResourceClient::onPut, this, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_3, asyncCallId);
+    result =
       m_ocResourcePtr->put(representation, QueryParamsMap(), attributeHandler);
-  if (OC_STACK_OK != result) {
-    ERROR_MSG("update was unsuccessful\n");
-    return result;
+    if (OC_STACK_OK != result) {
+      ERROR_MSG("update was unsuccessful\n");
+      return result;
+    }
   }
 
   return result;

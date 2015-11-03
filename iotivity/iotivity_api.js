@@ -306,7 +306,7 @@ OicClient.prototype.createResource = function(resourceinit) {
   var msg = {
     'cmd': 'createResource',
     'id': resourceId,
-    'OicResourceInit': resource
+    'OicResourceInit': resourceinit
   };
   return createPromise(msg);
 };

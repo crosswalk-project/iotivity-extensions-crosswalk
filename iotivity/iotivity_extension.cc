@@ -41,7 +41,7 @@ IotivityExtension::IotivityExtension() {
       "iotivity.OicDevice", "iotivity.OicDeviceSettings",
       "iotivity.OicDeviceInfo", "iotivity.OicClient", "iotivity.OicServer",
       "iotivity.OicRequestEvent", "iotivity.OicDiscoveryOptions",
-      "iotivity.OicResourceRepresentation", "iiotivity.OicResource",
+      "iotivity.OicResourceRepresentation", "iotivity.OicResource",
       "iotivity.HeaderOption", "iotivity.QueryOption", NULL};
   SetExtraJSEntryPoints(entry_points);
 }

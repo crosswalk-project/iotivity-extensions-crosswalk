@@ -617,7 +617,7 @@ extension.setMessageListener(function(json) {
     case 'entityHandler':
       handleEntityHandler(msg);
       break;
-    case 'foundDeviceCallback':
+    case 'findDevicesCompleted':
       handleFoundDevices(msg);
       break;
     case 'foundResourceCallback':

@@ -114,13 +114,15 @@ IotivityDevice::IotivityDevice(common::Instance* instance,
     if (settings->m_role != "client") {
       OCStackResult result = configurePlatformInfo(settings->m_deviceInfo);
 
-      if (OC_STACK_OK != result)
+      if (OC_STACK_OK != result) {
         throw OCException(OC::InitException::GENERAL_FAULT);
+      }
 
       result = configureDeviceInfo(settings->m_deviceInfo);
 
-      if (OC_STACK_OK != result)
+      if (OC_STACK_OK != result) {
         throw OCException(OC::InitException::GENERAL_FAULT);
+      }
     }
   }
 }
@@ -259,7 +261,7 @@ OCStackResult IotivityDevice::configurePlatformInfo(
   std::string supportUrl = deviceInfo.hasMap("supportUrl");
 
   std::string systemTime = deviceInfo.hasMap("systemTime");
-  if (systemTime == "") systemTime = "default";
+  if (systemTime == "") { systemTime = "default"; }
 
   DEBUG_MSG(
     "registerPlatformInfo:\n"
@@ -283,11 +285,18 @@ OCStackResult IotivityDevice::configurePlatformInfo(
     systemTime.c_str());
 
   result = SetPlatformInfo(
-             platformInfo, platformID, manufacturerName,
-             manufacturerUrl, modelNumber,
-             manufactureDate, platformVersion,
-             operatingSystemVersion, hardwareVersion,
-             firmwareVersion, supportUrl, systemTime);
+             platformInfo,
+             platformID,
+             manufacturerName,
+             manufacturerUrl,
+             modelNumber,
+             manufactureDate,
+             platformVersion,
+             operatingSystemVersion,
+             hardwareVersion,
+             firmwareVersion,
+             supportUrl,
+             systemTime);
   if (OC_STACK_OK != result) {
     ERROR_MSG("Platform Registration was unsuccessful\n");
     return result;
@@ -336,8 +345,9 @@ void IotivityDevice::handleConfigure(const picojson::value& value) {
   IotivityDeviceSettings deviceSettings;
   deviceSettings.deserialize(value.get("settings"));
 
-  if (deviceSettings.m_role == "client")
+  if (deviceSettings.m_role == "client") {
     return;
+  }
 
   configure(&deviceSettings);
 

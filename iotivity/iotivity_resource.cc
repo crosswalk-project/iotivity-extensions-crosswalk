@@ -89,13 +89,13 @@ void IotivityResourceInit::deserialize(const picojson::value& value) {
     m_resourceInterfaceArray.push_back((*iter).get<string>());
   }
 
-  if (m_resourceInterface == "") m_resourceInterface = DEFAULT_INTERFACE;
+  if (m_resourceInterface == "") { m_resourceInterface = DEFAULT_INTERFACE; }
 
-  if (m_discoverable) m_resourceProperty |= OC_DISCOVERABLE;
+  if (m_discoverable) { m_resourceProperty |= OC_DISCOVERABLE; }
 
-  if (m_observable) m_resourceProperty |= OC_OBSERVABLE;
+  if (m_observable) { m_resourceProperty |= OC_OBSERVABLE; }
 
-  if (m_isSecure) m_resourceProperty |= OC_SECURE;
+  if (m_isSecure) { m_resourceProperty |= OC_SECURE; }
 
   DEBUG_MSG("discoverable=%d, observable=%d, isSecure=%d\n", m_discoverable,
             m_observable, m_isSecure);
@@ -263,42 +263,37 @@ OCStackResult IotivityResourceServer::registerResource() {
   // Missing C/C++ API to retrieve server resource's host url
   m_idfull = std::to_string(getResourceHandleToInt());
 
-  if (m_oicResourceInit->m_resourceTypeNameArray.size() >= 2) {
-    for (unsigned int i = 1;
-          i < m_oicResourceInit->m_resourceTypeNameArray.size();
-          i++) {
-      std::string resourceTypeName =
-        m_oicResourceInit->m_resourceTypeNameArray[i];
+  int size = m_oicResourceInit->m_resourceTypeNameArray.size();
 
-      DEBUG_MSG("bindTypeToResource=%s\n", resourceTypeName.c_str());
+  for (unsigned int i = 1; i < size; i++) {
+    std::string resourceTypeName =
+      m_oicResourceInit->m_resourceTypeNameArray[i];
 
-      result =
-        OCPlatform::bindTypeToResource(m_resourceHandle, resourceTypeName);
+    DEBUG_MSG("bindTypeToResource=%s\n", resourceTypeName.c_str());
 
-      if (OC_STACK_OK != result) {
-        ERROR_MSG(
-          "bindTypeToResource TypeName "
-          "to Resource unsuccessful\n");
-        return result;
-      }
+    result =
+      OCPlatform::bindTypeToResource(m_resourceHandle, resourceTypeName);
+
+    if (OC_STACK_OK != result) {
+      ERROR_MSG(
+        "bindTypeToResource TypeName to Resource unsuccessful\n");
+      return result;
     }
   }
 
   int iSize = m_oicResourceInit->m_resourceInterfaceArray.size();
-  if (iSize >= 2) {
-    for (int i = 1; i < iSize; i++) {
-      std::string resourceInterface =
-        m_oicResourceInit->m_resourceInterfaceArray[i];
+  for (int i = 1; i < iSize; i++) {
+    std::string resourceInterface =
+      m_oicResourceInit->m_resourceInterfaceArray[i];
 
-      DEBUG_MSG("bindInterfaceToResource=%s\n", resourceInterface.c_str());
+    DEBUG_MSG("bindInterfaceToResource=%s\n", resourceInterface.c_str());
 
-      result = OCPlatform::bindInterfaceToResource(m_resourceHandle,
-               resourceInterface);
+    result = OCPlatform::bindInterfaceToResource(m_resourceHandle,
+             resourceInterface);
 
-      if (OC_STACK_OK != result) {
-        ERROR_MSG("Binding InterfaceName to Resource unsuccessful\n");
-        return result;
-      }
+    if (OC_STACK_OK != result) {
+      ERROR_MSG("Binding InterfaceName to Resource unsuccessful\n");
+      return result;
     }
   }
 
@@ -509,7 +504,7 @@ OCStackResult IotivityResourceClient::createResource(
 
   OCStackResult result = OC_STACK_ERROR;
 
-  if (m_ocResourcePtr == NULL) return result;
+  if (m_ocResourcePtr == NULL) { return result; }
 
   PostCallback attributeHandler =
     std::bind(&IotivityResourceClient::onPost, this, std::placeholders::_1,
@@ -529,7 +524,7 @@ OCStackResult IotivityResourceClient::retrieveResource(double asyncCallId) {
 
   OCStackResult result = OC_STACK_ERROR;
 
-  if (m_ocResourcePtr == NULL) return result;
+  if (m_ocResourcePtr == NULL) { return result; }
 
   GetCallback attributeHandler =
     std::bind(&IotivityResourceClient::onGet, this, std::placeholders::_1,
@@ -545,8 +540,8 @@ OCStackResult IotivityResourceClient::retrieveResource(double asyncCallId) {
 
 OCStackResult IotivityResourceClient::updateResource(
   OCRepresentation& representation, double asyncCallId) {
-  return IotivityResourceClient::updateResource(representation,
-                                                asyncCallId, false);
+  return IotivityResourceClient::updateResource(representation, asyncCallId,
+         false);
 }
 
 OCStackResult IotivityResourceClient::updateResource(
@@ -555,7 +550,7 @@ OCStackResult IotivityResourceClient::updateResource(
 
   OCStackResult result = OC_STACK_ERROR;
 
-  if (m_ocResourcePtr == NULL) return result;
+  if (m_ocResourcePtr == NULL) { return result; }
 
   PrintfOcRepresentation(representation);
 
@@ -589,7 +584,7 @@ OCStackResult IotivityResourceClient::deleteResource(double asyncCallId) {
 
   OCStackResult result = OC_STACK_ERROR;
 
-  if (m_ocResourcePtr == NULL) return result;
+  if (m_ocResourcePtr == NULL) { return result; }
 
   DeleteCallback deleteHandler =
     std::bind(&IotivityResourceClient::onDelete, this, std::placeholders::_1,
@@ -609,7 +604,7 @@ OCStackResult IotivityResourceClient::startObserving(double asyncCallId) {
 
   OCStackResult result = OC_STACK_ERROR;
 
-  if (m_ocResourcePtr == NULL) return result;
+  if (m_ocResourcePtr == NULL) { return result; }
 
   ObserveCallback observeHandler =
     std::bind(&IotivityResourceClient::onObserve, this, std::placeholders::_1,
@@ -632,7 +627,7 @@ OCStackResult IotivityResourceClient::cancelObserving(double asyncCallId) {
   DEBUG_MSG("cancelObserving %f\n", asyncCallId);
   OCStackResult result = OC_STACK_ERROR;
 
-  if (m_ocResourcePtr == NULL) return result;
+  if (m_ocResourcePtr == NULL) { return result; }
 
   result = m_ocResourcePtr->cancelObserve();
   if (OC_STACK_OK != result) {
@@ -720,7 +715,7 @@ void IotivityRequestEvent::deserialize(const picojson::value& value) {
     std::string objectKey = iter->first;
     picojson::value objectValue = iter->second;
 
-    if (objectKey == "uri") continue;
+    if (objectKey == "uri") { continue; }
 
     if (objectValue.is<bool>()) {
       DEBUG_MSG("[bool] key=%s, value=%d\n", objectKey.c_str(),

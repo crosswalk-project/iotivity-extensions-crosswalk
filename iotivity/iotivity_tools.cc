@@ -87,8 +87,8 @@ void PrintfOcRepresentation(const OCRepresentation& oCRepr) {
 }
 
 static void UpdateDestOcRepresentationString(OCRepresentation& oCReprDest,
-                                             std::string attributeName,
-                                             std::string value) {
+    std::string attributeName,
+    std::string value) {
   for (auto& cur : oCReprDest) {
     std::string attrname = cur.attrname();
     if (attrname == attributeName) {
@@ -106,8 +106,8 @@ static void UpdateDestOcRepresentationString(OCRepresentation& oCReprDest,
 }
 
 static void UpdateDestOcRepresentationInt(OCRepresentation& oCReprDest,
-                                          std::string attributeName,
-                                          int value) {
+    std::string attributeName,
+    int value) {
   for (auto& cur : oCReprDest) {
     std::string attrname = cur.attrname();
     if (attrname == attributeName) {
@@ -131,8 +131,8 @@ static void UpdateDestOcRepresentationInt(OCRepresentation& oCReprDest,
 }
 
 static void UpdateDestOcRepresentationBool(OCRepresentation& oCReprDest,
-                                           std::string attributeName,
-                                           bool value) {
+    std::string attributeName,
+    bool value) {
   for (auto& cur : oCReprDest) {
     std::string attrname = cur.attrname();
     if (attrname == attributeName) {
@@ -150,8 +150,8 @@ static void UpdateDestOcRepresentationBool(OCRepresentation& oCReprDest,
 }
 
 static void UpdateDestOcRepresentationDouble(OCRepresentation& oCReprDest,
-                                             std::string attributeName,
-                                             double value) {
+    std::string attributeName,
+    double value) {
   for (auto& cur : oCReprDest) {
     std::string attrname = cur.attrname();
     if (attrname == attributeName) {
@@ -219,7 +219,7 @@ void UpdateOcRepresentation(const OCRepresentation& oCReprSource,
 
 // Translate OCRepresentation to picojson
 void TranslateOCRepresentationToPicojson(const OCRepresentation& oCRepr,
-                                         picojson::object& objectRes) {
+    picojson::object& objectRes) {
   objectRes["uri"] = picojson::value(oCRepr.getUri());
   for (auto& cur : oCRepr) {
     std::string attrname = cur.attrname();

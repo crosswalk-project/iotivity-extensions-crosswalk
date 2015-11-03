@@ -50,29 +50,34 @@ class IotivityClient {
   std::map<std::string, IotivityDeviceInfo*> m_founddevicemap;
   std::mutex m_callbackLockDevices;
 
-  std::string m_discoveryOptionDeviceId;
-
  public:
   explicit IotivityClient(IotivityDevice* device);
   ~IotivityClient();
 
-  double m_asyncCallId_findresources;
-  double m_asyncCallId_finddevices;
-
   IotivityResourceClient* getResourceById(std::string id);
+  IotivityResourceClient* getResourceByDeviceId(std::string id);
 
-  void foundResourceCallback(std::shared_ptr<OCResource> resource, int waitsec);
-  void handleFindResources(const picojson::value& value);
-  void findResourceTimerCallback(int waitsec);
-  void findPreparedRequest(void);
+  void findDevicePreparedRequest(const picojson::value& value);
+  void findDeviceTimerCallback(const picojson::value& value);
+  void findPreparedRequest(const picojson::value& value);
+  void findResourcesByDeviceId(const std::string deviceId,
+                               const picojson::value& value);
+  void findResourceTimerCallback(const picojson::value& value);
 
-  void foundPlatformCallback(const OCRepresentation& rep);
-  void foundDeviceCallback(const OCRepresentation& rep, int waitsec);
-  void handleFindDevices(const picojson::value& value);
-  void findDeviceTimerCallback(int waitsec);
-  void findDevicePreparedRequest(void);
+  void foundPlatformByDeviceCallback(const OCRepresentation& rep,
+                                     std::string deviceId,
+                                     const picojson::value& value);
+  void foundDeviceCallback(const OCRepresentation& rep,
+                           const picojson::value& value);
+  void foundResourceCallback(std::shared_ptr<OCResource> resource,
+                             const picojson::value& value);
+  void foundResourceByDeviceCallback(std::shared_ptr<OCResource> resource,
+                                     const std::string deviceId,
+                                     const picojson::value& value);
 
   void handleCreateResource(const picojson::value& value);
+  void handleFindDevices(const picojson::value& value);
+  void handleFindResources(const picojson::value& value);
   void handleRetrieveResource(const picojson::value& value);
   void handleUpdateResource(const picojson::value& value);
   void handleDeleteResource(const picojson::value& value);

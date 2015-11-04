@@ -11,7 +11,7 @@ IOTIVITY_LIB_PATH ?=
 #IoTivity build params
 TARGET_ARCH ?= $(shell uname -p)
 TARGET_OS ?= $(shell uname -s | tr A-Z a-z)
-RELEASE ?=true
+RELEASE ?= true
 SCONS_PARAMS ?= TARGET_ARCH=$(TARGET_ARCH) TARGET_OS=$(TARGET_OS) RELEASE=$(RELEASE)
 
 #IoTivity extensions params
@@ -27,14 +27,17 @@ ifeq (, $(IOTIVITY_INC_PATH))
 IOTIVITY_INC_PATH = -I$(IOTIVITY_BUILD_DIR)/resource/csdk/stack/include/ \
         -I$(IOTIVITY_BUILD_DIR)/resource/oc_logger/include \
         -I$(IOTIVITY_BUILD_DIR)/resource/c_common \
-        -I$(IOTIVITY_BUILD_DIR)/resource/include
+        -I$(IOTIVITY_BUILD_DIR)/resource/include \
+        -I/usr/include
 endif
 
 ifeq (, $(IOTIVITY_LIB_PATH)) 
 ifeq ($(RELEASE), true)
-IOTIVITY_LIB_PATH = -L$(shell find . -path "*out/$(TARGET_OS)/$(TARGET_ARCH)/release/liboc.so" | xargs dirname)
+IOTIVITY_LIB_PATH = -L$(shell find . -path "*out/$(TARGET_OS)/$(TARGET_ARCH)/release/liboc.so" | xargs dirname) \
+					-L/usr/lib
 else
-IOTIVITY_LIB_PATH = -L$(shell find . -path "*out/$(TARGET_OS)/$(TARGT_ARCH)/debug/liboc.so" | xargs dirname)
+IOTIVITY_LIB_PATH = -L$(shell find . -path "*out/$(TARGET_OS)/$(TARGT_ARCH)/debug/liboc.so" | xargs dirname) \
+					-L/usr/lib
 endif
 endif
 

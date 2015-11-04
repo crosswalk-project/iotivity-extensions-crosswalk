@@ -263,7 +263,7 @@ OCStackResult IotivityResourceServer::registerResource() {
   // Missing C/C++ API to retrieve server resource's host url
   m_idfull = std::to_string(getResourceHandleToInt());
 
-  int size = m_oicResourceInit->m_resourceTypeNameArray.size();
+  unsigned int size = m_oicResourceInit->m_resourceTypeNameArray.size();
 
   for (unsigned int i = 1; i < size; i++) {
     std::string resourceTypeName =

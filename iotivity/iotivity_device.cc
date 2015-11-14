@@ -207,7 +207,8 @@ void IotivityDevice::configure(IotivityDeviceSettings* settings) {
   }
   // By setting to "0.0.0.0", it binds to all available interfaces
   // Uses randomly available port
-  // PlatformConfig cfg{ServiceType::InProc, modeType, host.c_str(), 0, QoS, &ps};
+  // PlatformConfig cfg{ServiceType::InProc, modeType,
+  // host.c_str(), 0, QoS, &ps};
   PlatformConfig cfg{ServiceType::InProc, modeType, host.c_str(), 0, QoS};
 
   DEBUG_MSG("OCPlatform::Configure: host=%s:%d\n", host.c_str(), port);

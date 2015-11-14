@@ -57,7 +57,7 @@ void PrintfOcRepresentation(const OCRepresentation& oCRepr) {
   DEBUG_MSG("\turi=%s\n", uri.c_str());
 
   // IOT-828
-  //DEBUG_MSG("\thost=%s\n", oCRepr.getHost().c_str());
+  // DEBUG_MSG("\thost=%s\n", oCRepr.getHost().c_str());
 
   DEBUG_MSG("\ttypes=%s\n", uri.c_str());
   for (const auto& resourceTypes : oCRepr.getResourceTypes()) {

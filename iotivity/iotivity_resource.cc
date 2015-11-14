@@ -53,7 +53,7 @@ IotivityResourceInit::IotivityResourceInit(const picojson::value& value) {
 IotivityResourceInit::~IotivityResourceInit() {}
 
 void IotivityResourceInit::deserialize(const picojson::value& value) {
-  DEBUG_MSG("IotivityResourceInit::deserialize\n");
+  DEBUG_MSG(">>IotivityResourceInit::deserialize\n");
 
   m_url = value.get("url").to_str();
   m_deviceId = value.get("deviceId").to_str();
@@ -108,30 +108,8 @@ void IotivityResourceInit::deserialize(const picojson::value& value) {
   DEBUG_MSG("properties: size=%d\n", propertiesobject.size());
 
   m_resourceRep.setUri(m_url);
-
-  for (picojson::value::object::iterator iter = propertiesobject.begin();
-       iter != propertiesobject.end(); ++iter) {
-    std::string objectKey = iter->first;
-    picojson::value objectValue = iter->second;
-
-    if (objectValue.is<bool>()) {
-      DEBUG_MSG("[bool] key=%s, value=%d\n", objectKey.c_str(),
-                objectValue.get<bool>());
-      m_resourceRep[objectKey] = objectValue.get<bool>();
-    } else if (objectValue.is<int>()) {
-      DEBUG_MSG("[int] key=%s, value=%d\n", objectKey.c_str(),
-                (int)objectValue.get<double>());
-      m_resourceRep[objectKey] = static_cast<int>(objectValue.get<double>());
-    } else if (objectValue.is<double>()) {
-      DEBUG_MSG("[double] key=%s, value=%f\n", objectKey.c_str(),
-                objectValue.get<double>());
-      m_resourceRep[objectKey] = objectValue.get<double>();
-    } else if (objectValue.is<string>()) {
-      DEBUG_MSG("[string] key=%s, value=%s\n", objectKey.c_str(),
-                objectValue.get<string>().c_str());
-      m_resourceRep[objectKey] = objectValue.get<string>();
-    }
-  }
+  PicojsonPropsToOCRep(m_resourceRep, propertiesobject);
+  DEBUG_MSG("<<IotivityResourceInit::deserialize\n");
 }
 
 void IotivityResourceInit::serialize(picojson::object& object) {
@@ -710,31 +688,7 @@ void IotivityRequestEvent::deserialize(const picojson::value& value) {
 
   m_resourceRep.setUri(properties.get("uri").to_str());
 
-  for (picojson::value::object::iterator iter = propertiesobject.begin();
-       iter != propertiesobject.end(); ++iter) {
-    std::string objectKey = iter->first;
-    picojson::value objectValue = iter->second;
-
-    if (objectKey == "uri") { continue; }
-
-    if (objectValue.is<bool>()) {
-      DEBUG_MSG("[bool] key=%s, value=%d\n", objectKey.c_str(),
-                objectValue.get<bool>());
-      m_resourceRep[objectKey] = objectValue.get<bool>();
-    } else if (objectValue.is<int>()) {
-      DEBUG_MSG("[int] key=%s, value=%d\n", objectKey.c_str(),
-                (int)objectValue.get<double>());
-      m_resourceRep[objectKey] = static_cast<int>(objectValue.get<double>());
-    } else if (objectValue.is<double>()) {
-      DEBUG_MSG("[double] key=%s, value=%f\n", objectKey.c_str(),
-                objectValue.get<double>());
-      m_resourceRep[objectKey] = objectValue.get<double>();
-    } else if (objectValue.is<string>()) {
-      DEBUG_MSG("[string] key=%s, value=%s\n", objectKey.c_str(),
-                objectValue.get<string>().c_str());
-      m_resourceRep[objectKey] = objectValue.get<string>();
-    }
-  }
+  PicojsonPropsToOCRep(m_resourceRep, propertiesobject);
 }
 
 void IotivityRequestEvent::serialize(picojson::object& object) {

@@ -72,6 +72,8 @@ void UpdateOcRepresentation(const OCRepresentation &oCReprSource,
                             std::vector<std::string> &updatedPropertyNames);
 void TranslateOCRepresentationToPicojson(
     const OCRepresentation &oCRepresentation, picojson::object &objectRes);
+void PicojsonPropsToOCRep(
+     OCRepresentation &oCRepresentation, picojson::object &objectRes);
 void CopyInto(std::vector<std::string> &src, picojson::array &dest);
 int GetWait(picojson::value v);
 

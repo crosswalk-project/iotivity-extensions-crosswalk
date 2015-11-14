@@ -51,10 +51,13 @@ void PrintfOcResource(const OCResource& oCResource) {
 }
 
 void PrintfOcRepresentation(const OCRepresentation& oCRepr) {
-  DEBUG_MSG("PrintfOcRepresentation:\n");
+  DEBUG_MSG(">>PrintfOcRepresentation:\n");
 
   std::string uri = oCRepr.getUri();
   DEBUG_MSG("\turi=%s\n", uri.c_str());
+
+  // IOT-828
+  //DEBUG_MSG("\thost=%s\n", oCRepr.getHost().c_str());
 
   DEBUG_MSG("\ttypes=%s\n", uri.c_str());
   for (const auto& resourceTypes : oCRepr.getResourceTypes()) {
@@ -68,6 +71,7 @@ void PrintfOcRepresentation(const OCRepresentation& oCRepr) {
 
   for (const auto& cur : oCRepr) {
     std::string attrname = cur.attrname();
+    DEBUG_MSG("\tattr  key=%s\n", attrname.c_str());
 
     if (AttributeType::String == cur.type()) {
       std::string curStr = cur.getValue<string>();
@@ -82,8 +86,27 @@ void PrintfOcRepresentation(const OCRepresentation& oCRepr) {
     } else if (AttributeType::Boolean == cur.type()) {
       DEBUG_MSG("\tRep[Boolean]: key=%s, value=%d\n", attrname.c_str(),
                 cur.getValue<bool>());
+    } else if (AttributeType::OCRepresentation == cur.type()) {
+      DEBUG_MSG("\tRep[OCRepresentation]: key=%s, value=%s\n",
+                attrname.c_str(), "OCRep");
+      PrintfOcRepresentation(cur.getValue<OCRepresentation>());
+    } else if (AttributeType::Vector == cur.type()) {
+      DEBUG_MSG("\tRep[OCRepresentation]: key=%s, value=%s\n",
+                attrname.c_str(), "Vector");
+      if (cur.base_type() == AttributeType::OCRepresentation) {
+        DEBUG_MSG("\tVector of OCRepresentation\n");
+
+        std::vector<OCRepresentation> v =
+          cur.getValue<std::vector<OCRepresentation>>();
+        for (const auto& curv : v) {
+          DEBUG_MSG("\t>>Print sub OCRepresentation\n");
+          PrintfOcRepresentation(curv);
+          DEBUG_MSG("\t<<Print sub OCRepresentation\n");
+        }
+      }
     }
   }
+  DEBUG_MSG("<<PrintfOcRepresentation:\n");
 }
 
 static void UpdateDestOcRepresentationString(OCRepresentation& oCReprDest,
@@ -173,6 +196,26 @@ static void UpdateDestOcRepresentationDouble(OCRepresentation& oCReprDest,
   }
 }
 
+static void UpdateDestOcRepresentationOCRep(OCRepresentation& oCReprDest,
+    std::string attributeName,
+    OCRepresentation& value) {
+  for (auto& cur : oCReprDest) {
+    std::string attrname = cur.attrname();
+    if (attrname == attributeName) {
+      if (AttributeType::OCRepresentation == cur.type()) {
+        OCRepresentation oldValue = cur.getValue<OCRepresentation>();
+        cur = value;
+        DEBUG_MSG("Updated[%s] old=%s, new=%s\n", attrname.c_str(),
+                  oldValue.getUri().c_str(),
+                  value.getUri().c_str());
+      } else {
+        DEBUG_MSG("Updated[%s] mismatch OCRepresentation\n", attrname.c_str());
+        return;
+      }
+    }
+  }
+}
+
 void UpdateOcRepresentation(const OCRepresentation& oCReprSource,
                             OCRepresentation& oCReprDest,
                             std::vector<std::string>& updatedPropertyNames) {
@@ -212,9 +255,137 @@ void UpdateOcRepresentation(const OCRepresentation& oCReprSource,
         DEBUG_MSG("cur.type Double\n");
         double newValue = cur.getValue<double>();
         UpdateDestOcRepresentationDouble(oCReprDest, attrname, newValue);
+      } else if (AttributeType::OCRepresentation == cur.type()) {
+        DEBUG_MSG("cur.type OcRepresentation\n");
+        OCRepresentation newValue = cur.getValue<OCRepresentation>();
+        UpdateDestOcRepresentationOCRep(oCReprDest, attrname, newValue);
+      } else if (AttributeType::Vector == cur.type()) {
+        DEBUG_MSG("cur.type Vector\n");
+
+        if (AttributeType::Integer == cur.base_type()) {
+          std::vector<int> newValue = cur.getValue<std::vector<int>>();
+
+          for (auto& curd : oCReprDest) {
+            if (attrname != curd.attrname()) continue;
+            if (AttributeType::Vector != curd.type()) continue;
+            if (AttributeType::Integer != cur.base_type()) continue;
+            curd = newValue;
+          }
+        } else if (AttributeType::Double == cur.base_type()) {
+          std::vector<double> newValue = cur.getValue<std::vector<double>>();
+
+          for (auto& curd : oCReprDest) {
+            if (attrname != curd.attrname()) continue;
+            if (AttributeType::Vector != curd.type()) continue;
+            if (AttributeType::Double != cur.base_type()) continue;
+            curd = newValue;
+          }
+        } else if (AttributeType::String == cur.base_type()) {
+          std::vector<std::string> newValue =
+            cur.getValue<std::vector<std::string>>();
+
+          for (auto& curd : oCReprDest) {
+            if (attrname != curd.attrname()) continue;
+            if (AttributeType::Vector != curd.type()) continue;
+            if (AttributeType::String != cur.base_type()) continue;
+            curd = newValue;
+          }
+        } else if (AttributeType::OCRepresentation == cur.base_type()) {
+          std::vector<OCRepresentation> newValue =
+            cur.getValue<std::vector<OCRepresentation>>();
+
+          for (auto& curd : oCReprDest) {
+            if (attrname != curd.attrname()) continue;
+            if (AttributeType::Vector != curd.type()) continue;
+            if (AttributeType::OCRepresentation != cur.base_type()) continue;
+            curd = newValue;
+          }
+        }
       }
     }
   }
+}
+
+void PicojsonPropsToOCRep(
+    OCRepresentation &rep,
+    picojson::object &props) {
+  DEBUG_MSG(">>PicojsonPropsToOCReps \n");
+  for (picojson::value::object::iterator piter = props.begin();
+     piter != props.end(); ++piter) {
+    std::string key = piter->first;
+    picojson::value value = piter->second;
+
+    DEBUG_MSG("\t>>key = %s\n", key.c_str());
+
+    if (value.is<bool>()) {
+       DEBUG_MSG("\tbool val\n");
+      rep[key] = value.get<bool>();
+    } else if (value.is<int>()) {
+      DEBUG_MSG("\tint val\n");
+      rep[key] = static_cast<int>(value.get<double>());
+    } else if (value.is<double>()) {
+      DEBUG_MSG("\tdouble val\n");
+      rep[key] = value.get<double>();
+    } else if (value.is<string>()) {
+      DEBUG_MSG("\tstring val\n");
+      rep[key] = value.get<string>();
+    } else if (value.is<picojson::array>()) {
+      DEBUG_MSG("\tarray val\n");
+      picojson::array array = value.get<picojson::array>();
+      picojson::array::iterator iter = array.begin();
+
+      if ((*iter).is<bool>()) {
+        DEBUG_MSG("\t\tbool base_type\n");
+        std::vector<bool> v;
+        for (; iter != array.end(); ++iter) {
+          if ((*iter).is<bool>()) {
+            v.push_back((*iter).get<bool>());
+          }
+        }
+        rep[key] = v;
+      } else if ((*iter).is<int>()) {
+        DEBUG_MSG("\t\tint base_type\n");
+        std::vector<int> v;
+        for (; iter != array.end(); ++iter) {
+          if ((*iter).is<int>()) {
+            v.push_back((*iter).get<int>());
+          }
+        }
+        rep[key] = v;
+      } else if ((*iter).is<double>()) {
+        DEBUG_MSG("\t\tdouble base_type\n");
+        std::vector<double> v;
+        for (; iter != array.end(); ++iter) {
+          if ((*iter).is<double>()) {
+            v.push_back((*iter).get<double>());
+          }
+        }
+        rep[key] = v;
+      } else if ((*iter).is<string>()) {
+        DEBUG_MSG("\t\tstring base_type\n");
+        std::vector<std::string> v;
+        for (; iter != array.end(); ++iter) {
+          if ((*iter).is<string>()) {
+            v.push_back((*iter).get<string>());
+          }
+        }
+        rep[key] = v;
+      } else if ((*iter).is<picojson::object>()) {
+        DEBUG_MSG("\t\tobject base_type\n");
+        std::vector<OCRepresentation> v;
+        for (; iter != array.end(); ++iter) {
+          OCRepresentation repi;
+          picojson::object propi = (*iter).get<picojson::object>();
+          PicojsonPropsToOCRep(repi, propi);
+          v.push_back(repi);
+        }
+        rep[key] = v;
+      }
+    }
+    DEBUG_MSG("\t<<key = %s\n", key.c_str());
+  }
+  DEBUG_MSG("<<PicojsonPropsToOCReps after:\n");
+  PrintfOcRepresentation(rep);
 }
 
 // Translate OCRepresentation to picojson
@@ -232,10 +403,50 @@ void TranslateOCRepresentationToPicojson(const OCRepresentation& oCRepr,
       objectRes[attrname] = picojson::value(static_cast<double>(intValue));
     } else if (AttributeType::Double == cur.type()) {
       double doubleValue = cur.getValue<double>();
-      objectRes[attrname] = picojson::value(static_cast<double>(doubleValue));
+      objectRes[attrname] = picojson::value(doubleValue);
     } else if (AttributeType::Boolean == cur.type()) {
       bool boolValue = cur.getValue<bool>();
-      objectRes[attrname] = picojson::value(static_cast<bool>(boolValue));
+      objectRes[attrname] = picojson::value(boolValue);
+    } else if (AttributeType::OCRepresentation == cur.type()) {
+      OCRepresentation ocrValue = cur.getValue<OCRepresentation>();
+      picojson::object picoRep;
+      TranslateOCRepresentationToPicojson(ocrValue, picoRep);
+      objectRes[attrname] = picojson::value(picoRep);
+    } else if (AttributeType::Vector == cur.type()) {
+      DEBUG_MSG("\tTranslateArrayToPicojson\n");
+      picojson::array array;
+
+      if (cur.base_type() == AttributeType::OCRepresentation) {
+        std::vector<OCRepresentation> v =
+          cur.getValue<std::vector<OCRepresentation>>();
+
+        for (auto const item : v) {
+          picojson::object obj;
+          TranslateOCRepresentationToPicojson(item, obj);
+          array.push_back(picojson::value(obj));
+        }
+      } else if (cur.base_type() == AttributeType::String) {
+        std::vector<std::string> v = cur.getValue<std::vector<std::string>>();
+        for (auto const item : v) {
+          array.push_back(picojson::value(item));
+        }
+      } else if (cur.base_type() == AttributeType::Boolean) {
+        std::vector<bool> v = cur.getValue<std::vector<bool>>();
+        for (auto const item : v) {
+          array.push_back(picojson::value(item));
+        }
+      } else if (cur.base_type() == AttributeType::Double) {
+        std::vector<double> v = cur.getValue<std::vector<double>>();
+        for (auto const item : v) {
+          array.push_back(picojson::value(item));
+        }
+      } else if (cur.base_type() == AttributeType::Integer) {
+        std::vector<int> v = cur.getValue<std::vector<int>>();
+        for (auto const item : v) {
+          array.push_back(picojson::value(static_cast<double>(item)));
+        }
+      }
+      objectRes[attrname] = picojson::value(array);
     }
   }
 }

@@ -154,9 +154,6 @@ function OicDevice(settings) {
   _addConstProperty(this, 'server', new OicServer());
 
   g_iotivity_device = this;
-
-  // if (g_iotivity_device)
-  //  g_iotivity_device.configure(this.settings);
 }
 
 // partial dictionary is ok
@@ -246,6 +243,7 @@ function OicDeviceInfo(obj) {
                       obj.coreSpecVersion || 'default');
     _addConstProperty(this, 'osVersion', obj.osVersion || 'default');
     _addConstProperty(this, 'model', obj.model || 'default');
+    _addConstProperty(this, 'hardwareVersion', obj.hardwareVersion || 'default');
     _addConstProperty(this, 'manufacturerName',
                       obj.manufacturerName || 'default');
     _addConstProperty(this, 'manufacturerUrl',
@@ -257,23 +255,11 @@ function OicDeviceInfo(obj) {
     _addConstProperty(this, 'firmwareVersion',
                       obj.firmwareVersion || 'default');
     _addConstProperty(this, 'supportUrl', obj.supportUrl || 'default');
-  } else {
-    _addConstProperty(this, 'uuid', 'default');
-    _addConstProperty(this, 'name', 'default');
-    _addConstProperty(this, 'dataModels', 'default');
-    _addConstProperty(this, 'coreSpecVersion', 'default');
-    _addConstProperty(this, 'osVersion', 'default');
-    _addConstProperty(this, 'model', 'default');
-    _addConstProperty(this, 'manufacturerName', 'default');
-    _addConstProperty(this, 'manufacturerUrl', 'default');
-    _addConstProperty(this, 'manufacturerDate', 'default');
-    _addConstProperty(this, 'platformVersion', 'default');
-    _addConstProperty(this, 'firmwareVersion', 'default');
-    _addConstProperty(this, 'supportUrl', 'default');
   }
 }
 
 iotivity.OicDeviceInfo = OicDeviceInfo;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // OicClient
@@ -626,24 +612,19 @@ extension.setMessageListener(function(json) {
     case 'onObserve':
       handleOnObserve(msg);
       break;
-
     case 'createResourceCompleted':
       handleCreateResourceCompleted(msg);
       break;
-
     case 'retrieveResourceCompleted':
     case 'startObservingCompleted':
       handleRetrieveResourceCompleted(msg);
       break;
-
     case 'updateResourceCompleted':
       handleUpdateResourceCompleted(msg);
       break;
-
     case 'deleteResourceCompleted':
       handleDeleteResourceCompleted(msg);
       break;
-
     case 'configureCompleted':
     case 'unregisterResourceCompleted':
     case 'enablePresenceCompleted':

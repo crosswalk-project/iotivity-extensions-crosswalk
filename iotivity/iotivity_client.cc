@@ -93,7 +93,7 @@ void IotivityClient::findDevicePreparedRequest(const picojson::value& value) {
     deviceInfo->serialize(properties);
     deviceobj["info"] = picojson::value(properties);
     devicesArray.push_back(picojson::value(deviceobj));
-    m_devicemap[entity.first] = entity.second;
+    m_devicemap[entity.first] = deviceInfo;
   }
 
   object["devicesArray"] = picojson::value(devicesArray);
@@ -203,13 +203,13 @@ void IotivityClient::foundPlatformByDeviceCallback(const OCRepresentation &rep,
   std::string val;
   std::string values[] = {
     "pi",   "Platform ID                    ", "platformId",
-    "mnmn", "Manufacturer name              ", "manufacturerName",
-    "mnml", "Manufacturer url               ", "manufacturerUrl",
-    "mnmo", "Manufacturer Model No          ", "model",
     "mndt", "Manufactured Date              ", "manufacturerDate",
-    "mnpv", "Manufacturer Platform Version  ", "platfromeVersion",
-    "mnos", "Manufacturer OS version        ", "osVersion",
     "mnhw", "Manufacturer hardware version  ", "hardwareVersion",
+    "mnml", "Manufacturer url               ", "manufacturerUrl",
+    "mnmn", "Manufacturer name              ", "manufacturerName",
+    "mnmo", "Manufacturer Model No          ", "model",
+    "mnos", "Manufacturer OS version        ", "osVersion",
+    "mnpv", "Manufacturer Platform Version  ", "platfromeVersion",
     "mnfv", "Manufacturer firmware version  ", "firmwareVersion",
     "mnsl", "Manufacturer support url       ", "supportUrl",
     "st",   "Manufacturer system time       ", "systemTime"
@@ -368,19 +368,19 @@ void IotivityClient::handleFindDevices(const picojson::value &value) {
 
   std::string hostUri = "";  //  multicast
   std::string deviceDiscoveryURI = "/oic/d";
-  std::string deviceDiscoveryRequest = OC_MULTICAST_PREFIX + deviceDiscoveryURI;
+  std::string deviceDiscoveryRequest = OC_MULTICAST_PREFIX +
+                                       deviceDiscoveryURI;
 
   DEBUG_MSG("process: hostUri=%s, uri1=%s, timeout=%ds\n",
             hostUri.c_str(), deviceDiscoveryRequest.c_str(), waitsec);
 
-  OCConnectivityType connectivityType = CT_ADAPTER_IP;
   FindDeviceCallback deviceInfoHandler =
     std::bind(&IotivityClient::foundDeviceCallback, this,
               std::placeholders::_1, value);
 
   OCStackResult result = OCPlatform::getDeviceInfo(hostUri,
                          deviceDiscoveryRequest,
-                         connectivityType, deviceInfoHandler);
+                         CT_ADAPTER_IP, deviceInfoHandler);
   if (OC_STACK_OK != result) {
     ERROR_MSG("OCPlatform::getDeviceInfo was unsuccessful\n");
     m_device->postError(async_call_id);
@@ -500,6 +500,7 @@ void IotivityClient::handleRetrieveResource(const picojson::value &value) {
       return;
     }
   } else {
+    DEBUG_MSG("handleRetrieveResource: ERROR_MSG resource not found\n");
     m_device->postError(async_call_id);
   }
 }
@@ -510,15 +511,18 @@ void IotivityClient::handleStartObserving(const picojson::value &value) {
   OCStackResult result;
   double async_call_id = value.get("asyncCallId").get<double>();
   std::string resId = value.get("id").to_str();
+  DEBUG_MSG("\tstartObserving resId = %s\n", resId.c_str());
   IotivityResourceClient *resClient = getResourceById(resId);
 
   if (resClient != NULL) {
     result = resClient->startObserving(async_call_id);
     if (OC_STACK_OK != result) {
+      DEBUG_MSG("\tstartObserving ERROR\n");
       m_device->postError(async_call_id);
       return;
     }
   } else {
+    DEBUG_MSG("\tresClient NULL ERROR\n");
     m_device->postError(async_call_id);
     return;
   }

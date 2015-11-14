@@ -104,27 +104,6 @@ IotivityDevice::IotivityDevice(common::Instance* instance)
 IotivityDevice::IotivityDevice(common::Instance* instance,
                                IotivityDeviceSettings* settings) {
   m_instance = instance;
-
-  configure(settings);
-
-  if (settings != NULL) {
-    DEBUG_MSG("IotivityDevice:: settings client_mode = %s\n",
-              settings->m_role.c_str());
-
-    if (settings->m_role != "client") {
-      OCStackResult result = configurePlatformInfo(settings->m_deviceInfo);
-
-      if (OC_STACK_OK != result) {
-        throw OCException(OC::InitException::GENERAL_FAULT);
-      }
-
-      result = configureDeviceInfo(settings->m_deviceInfo);
-
-      if (OC_STACK_OK != result) {
-        throw OCException(OC::InitException::GENERAL_FAULT);
-      }
-    }
-  }
 }
 
 IotivityDevice::~IotivityDevice() {
@@ -188,6 +167,7 @@ static OCStackResult SetDeviceInfo(OCDeviceInfo& deviceInfo, std::string name) {
 }
 
 void IotivityDevice::configure(IotivityDeviceSettings* settings) {
+  // OCPersistentStorage ps {client_open, fread, fwrite, fclose, unlink };
   OC::QualityOfService QoS = OC::QualityOfService::LowQos;
   OC::ModeType modeType = OC::ModeType::Both;
   std::string host = "0.0.0.0";
@@ -195,9 +175,9 @@ void IotivityDevice::configure(IotivityDeviceSettings* settings) {
 
   if (settings) {
     if (settings->m_connectionMode == "non-acked") {
-      QoS = OC::QualityOfService::HighQos;
-    } else {
       QoS = OC::QualityOfService::LowQos;
+    } else {
+      QoS = OC::QualityOfService::HighQos;
     }
 
     if (settings->m_role == "server") {
@@ -227,6 +207,7 @@ void IotivityDevice::configure(IotivityDeviceSettings* settings) {
   }
   // By setting to "0.0.0.0", it binds to all available interfaces
   // Uses randomly available port
+  // PlatformConfig cfg{ServiceType::InProc, modeType, host.c_str(), 0, QoS, &ps};
   PlatformConfig cfg{ServiceType::InProc, modeType, host.c_str(), 0, QoS};
 
   DEBUG_MSG("OCPlatform::Configure: host=%s:%d\n", host.c_str(), port);

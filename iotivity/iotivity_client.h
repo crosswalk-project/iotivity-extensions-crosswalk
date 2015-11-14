@@ -55,25 +55,18 @@ class IotivityClient {
   ~IotivityClient();
 
   IotivityResourceClient* getResourceById(std::string id);
-  IotivityResourceClient* getResourceByDeviceId(std::string id);
 
   void findDevicePreparedRequest(const picojson::value& value);
   void findDeviceTimerCallback(const picojson::value& value);
   void findPreparedRequest(const picojson::value& value);
-  void findResourcesByDeviceId(const std::string deviceId,
-                               const picojson::value& value);
   void findResourceTimerCallback(const picojson::value& value);
 
-  void foundPlatformByDeviceCallback(const OCRepresentation& rep,
-                                     std::string deviceId,
-                                     const picojson::value& value);
   void foundDeviceCallback(const OCRepresentation& rep,
                            const picojson::value& value);
+  void foundPlatformCallback(const OCRepresentation& rep,
+                             const std::string &deviceUUID);
   void foundResourceCallback(std::shared_ptr<OCResource> resource,
                              const picojson::value& value);
-  void foundResourceByDeviceCallback(std::shared_ptr<OCResource> resource,
-                                     const std::string deviceId,
-                                     const picojson::value& value);
 
   void handleCreateResource(const picojson::value& value);
   void handleFindDevices(const picojson::value& value);

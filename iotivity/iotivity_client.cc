@@ -144,7 +144,7 @@ void IotivityClient::findResourceTimerCallback(const picojson::value &value) {
 void IotivityClient::foundDeviceCallback(const OCRepresentation &rep,
     const picojson::value &value) {
   DEBUG_MSG("\n###foundDeviceCallback:\n");
-
+  int waitsec = GetWait(value);
   std::string val;
   std::string values[] = {
     "di", "Device ID        ", "n", "Device name      ", "lcv",
@@ -175,7 +175,9 @@ void IotivityClient::foundDeviceCallback(const OCRepresentation &rep,
 
     deviceInfo->m_deviceinfomap["uuid"] = deviceUUID;
 
-    if (rep.getValue("n", val)) { deviceInfo->m_deviceinfomap["name"] = val; }
+    if (rep.getValue("n", val)) {
+      deviceInfo->m_deviceinfomap["name"] = val;
+    }
     if (rep.getValue("lcv", val)) {
       deviceInfo->m_deviceinfomap["coreSpecVersion"] = val;
     }
@@ -183,22 +185,39 @@ void IotivityClient::foundDeviceCallback(const OCRepresentation &rep,
       deviceInfo->m_deviceinfomap["dataModels"] = val;
     }
     m_founddevicemap[deviceUUID] = deviceInfo;
-  } else {
-    // if no "di" shoudl not happen. Post immediately
-    int waitsec = GetWait(value);
+/*
+    // Get platfrom info from host, require IOT-828
+    std::string hostUri = rep.getHost();  //  unicast
+    std::string platformDiscoveryRequest = "/oic/p";
 
+    DEBUG_MSG("process: hostUri=%s, uri1=%s, timeout=%ds devId=%s\n",
+              hostUri.c_str(), platformDiscoveryRequest.c_str(),
+              waitsec, deviceUUID.c_str());
+
+    FindPlatformCallback platformInfoHandler =
+      std::bind(&IotivityClient::foundPlatformCallback, this,
+                std::placeholders::_1, deviceUUID);
+    OCStackResult result = OCPlatform::getPlatformInfo(hostUri,
+                           platformDiscoveryRequest,
+                           CT_ADAPTER_IP, platformInfoHandler);
+
+    if (OC_STACK_OK != result) {
+      ERROR_MSG("OCPlatform::getPlatformInfo was unsuccessful\n");
+      double async_call_id = value.get("asyncCallId").get<double>();
+      m_device->postError(async_call_id);
+      return;
+    }
+*/
+  } else {
     if (waitsec == -1) {
       findDevicePreparedRequest(value);
     }
   }
 }
 
-void IotivityClient::foundPlatformByDeviceCallback(const OCRepresentation &rep,
-    std::string deviceId,
-    const picojson::value &value) {
-  // Request was done with host, so should only get one cb
-  DEBUG_MSG("\n###foundPlatformDeviceCallback deviceId = %s\n",
-            deviceId.c_str());
+void IotivityClient::foundPlatformCallback(const OCRepresentation &rep,
+    const std::string &deviceUUID) {
+  DEBUG_MSG("\n###foundPlatformCallback devId:%s\n", deviceUUID.c_str());
 
   std::string val;
   std::string values[] = {
@@ -215,45 +234,67 @@ void IotivityClient::foundPlatformByDeviceCallback(const OCRepresentation &rep,
     "st",   "Manufacturer system time       ", "systemTime"
   };
 
-  PrintfOcRepresentation(rep);
-  std::string deviceUUID = deviceId;
-
-  IotivityDeviceInfo *deviceInfo = NULL;
-  std::map<std::string, IotivityDeviceInfo *>::const_iterator it;
-  it = m_founddevicemap.find(deviceUUID);
-
-  if (it != m_founddevicemap.end()) {
-    DEBUG_MSG("\t Use EXISTING info for uuid %s\n", deviceUUID.c_str());
-    deviceInfo = m_founddevicemap[deviceUUID];
-  } else {
-    DEBUG_MSG("\t######### ERROR %s\n", deviceUUID.c_str());
-    return;
-  }
-
-  for (unsigned int i = 0; i < sizeof(values) / sizeof(values[0]); i += 3) {
+  for (unsigned int i = 0; i < sizeof(values) / sizeof(values[0]); i += 2) {
     if (rep.getValue(values[i], val)) {
-      deviceInfo->m_deviceinfomap[values[i + 2]] = val;
-      DEBUG_MSG("\t Device info[%s] = :%s\n",
-                values[i + 2].c_str(),
-                val.c_str());
+      DEBUG_MSG("\t%s:%s\n", values[i + 1].c_str(), val.c_str());
     }
   }
 
-  int waitsec = GetWait(value);
+  PrintfOcRepresentation(rep);
 
-  if (waitsec == -1) {
-    findDevicePreparedRequest(value);
+  // Populate device info if "di"
+  if (rep.getValue("pi", val)) {
+    // device id must exist since platform request follows device request
+    IotivityDeviceInfo *deviceInfo = NULL;
+    std::map<std::string, IotivityDeviceInfo *>::const_iterator it;
+    it = m_founddevicemap.find(deviceUUID);
+
+    // device map should find deviceUUID
+    if (it != m_founddevicemap.end()) {
+      deviceInfo = m_founddevicemap[deviceUUID];
+    } else {
+      deviceInfo = new IotivityDeviceInfo();
+      m_founddevicemap[deviceUUID] = deviceInfo;
+    }
+
+    if (rep.getValue("pi", val)) {
+      deviceInfo->m_deviceinfomap["platformId"] = val;
+    }
+    if (rep.getValue("mndt", val)) {
+      deviceInfo->m_deviceinfomap["manufactureDate"] = val;
+    }
+    if (rep.getValue("mnfv", val)) {
+      deviceInfo->m_deviceinfomap["firmwareVersion"] = val;
+    }
+    if (rep.getValue("mnhw", val)) {
+      deviceInfo->m_deviceinfomap["hardwareVersion"] = val;
+    }
+    if (rep.getValue("mnml", val)) {
+      deviceInfo->m_deviceinfomap["manufacturerUrl"] = val;
+    }
+    if (rep.getValue("mnmn", val)) {
+      deviceInfo->m_deviceinfomap["manufacturerName"] = val;
+    }
+    if (rep.getValue("mnmo", val)) {
+      deviceInfo->m_deviceinfomap["model"] = val;
+    }
+    if (rep.getValue("mnos", val)) {
+      deviceInfo->m_deviceinfomap["osVersion"] = val;
+    }
+    if (rep.getValue("mnpv", val)) {
+      deviceInfo->m_deviceinfomap["platformVersion"] = val;
+    }
+    if (rep.getValue("mnsl", val)) {
+      deviceInfo->m_deviceinfomap["supportUrl"] = val;
+    }
+    if (rep.getValue("st", val)) {
+      deviceInfo->m_deviceinfomap["manufactureDate"] = val;
+    }
   }
 }
 
-
-IotivityResourceClient *IotivityClient::getResourceByDeviceId(
-  std::string deviceId) {
-  // all in same map
-  return getResourceById(deviceId);
-}
-
 IotivityResourceClient *IotivityClient::getResourceById(std::string id) {
+  DEBUG_MSG("getResourceById: id=%s\n", id.c_str());
   if (m_resourcemap.size()) {
     std::map<std::string, IotivityResourceClient *>::const_iterator it;
     if ((it = m_resourcemap.find(id)) != m_resourcemap.end()) {

@@ -39,6 +39,8 @@ namespace common {
 class Instance;
 }
 
+#define JSON_DB_PATH "./oic_svr_db_client.json"
+
 class IotivityServer;
 class IotivityClient;
 

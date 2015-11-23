@@ -32,11 +32,13 @@
 #include "iotivity/iotivity_server.h"
 #include "iotivity/iotivity_client.h"
 
+#if SECURE
 #include "oxmjustworks.h"
 #include "oxmrandompin.h"
 #include "securevirtualresourcetypes.h"
 #include "srmutility.h"
 #include "pmtypes.h"
+#endif
 
 //Secure Virtual Resource database for Iotivity Client application
 //It contains Client's Identity and the PSK credentials

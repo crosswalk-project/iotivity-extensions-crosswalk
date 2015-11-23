@@ -60,7 +60,7 @@ void IotivityResourceInit::deserialize(const picojson::value& value) {
   m_connectionMode = value.get("connectionMode").to_str();
   m_discoverable = value.get("discoverable").get<bool>();
   m_observable = value.get("observable").get<bool>();
-  m_isSecure = false;
+  m_isSecure = value.get("secure").get<bool>();
   m_resourceTypeName = "";
   m_resourceInterface = "";
   m_resourceProperty = 0;

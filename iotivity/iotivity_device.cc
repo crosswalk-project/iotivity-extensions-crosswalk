@@ -32,6 +32,23 @@
 #include "iotivity/iotivity_server.h"
 #include "iotivity/iotivity_client.h"
 
+#include "oxmjustworks.h"
+#include "oxmrandompin.h"
+#include "securevirtualresourcetypes.h"
+#include "srmutility.h"
+#include "pmtypes.h"
+
+//Secure Virtual Resource database for Iotivity Client application
+//It contains Client's Identity and the PSK credentials
+//of other devices which the client trusts
+static char CRED_FILE[] = "oic_stb_db_server.json";
+
+FILE* xwalk_client_fopen(const char *path, const char *mode)
+{
+  (void)path;
+  return fopen(CRED_FILE, mode);
+}
+
 IotivityDeviceInfo::IotivityDeviceInfo() {}
 
 IotivityDeviceInfo::~IotivityDeviceInfo() {}
@@ -205,11 +222,25 @@ void IotivityDevice::configure(IotivityDeviceSettings* settings) {
       }
     }
   }
+
+  static OCPersistentStorage ps = { xwalk_client_fopen, fread, fwrite, fclose, unlink };
+
+  if (OC_STACK_OK != OCRegisterPersistentStorageHandler(&ps))
+  {
+    return -1;
+  }
+
+  if (OCInit(NULL, 0, OC_CLIENT_SERVER) != OC_STACK_OK)
+  {
+    std::cout << "ERROR OCStack init error" << std::endl;
+    return 0;
+  }
+
   // By setting to "0.0.0.0", it binds to all available interfaces
   // Uses randomly available port
   // PlatformConfig cfg{ServiceType::InProc, modeType,
   // host.c_str(), 0, QoS, &ps};
-  PlatformConfig cfg{ServiceType::InProc, modeType, host.c_str(), 0, QoS};
+  PlatformConfig cfg{ServiceType::InProc, modeType, host.c_str(), 0, QoS, &ps};
 
   DEBUG_MSG("OCPlatform::Configure: host=%s:%d\n", host.c_str(), port);
 

@@ -5,8 +5,8 @@ IOTIVITY_REBUILD ?=
 
 BUILD_DIR ?= build
 IOTIVITY_BUILD_DIR = $(BUILD_DIR)/iotivity-$(IOTIVITY_VERSION)
-IOTIVITY_INC_PATH ?= 
-IOTIVITY_LIB_PATH ?= 
+IOTIVITY_INC_PATH ?=
+IOTIVITY_LIB_PATH ?=
 
 #IoTivity build params
 TARGET_ARCH ?= $(shell uname -p)
@@ -15,15 +15,15 @@ RELEASE ?= true
 SCONS_PARAMS ?= TARGET_ARCH=$(TARGET_ARCH) TARGET_OS=$(TARGET_OS) RELEASE=$(RELEASE)
 
 #IoTivity extensions params
-EXTENSION_CCFLAGS = $(CFLAGS) -loc -loc_logger -loctbstack -fPIC -Wall -std=c++11
+EXTENSION_CCFLAGS = $(CFLAGS) -loc -loc_logger -loctbstack -fPIC -Wall -Wno-write-strings -std=c++11
 EXTENSION_SRCDIR = iotivity
 SOURCES = $(wildcard $(EXTENSION_SRCDIR)/*.cc) common/extension.cc
 
 ifeq ($(IOTIVITY_REBUILD), true)
-REBUILD = build_iotivity 
+REBUILD = build_iotivity
 endif
 
-ifeq (, $(IOTIVITY_INC_PATH)) 
+ifeq (, $(IOTIVITY_INC_PATH))
 IOTIVITY_INC_PATH = -I$(IOTIVITY_BUILD_DIR)/resource/csdk/stack/include/ \
         -I$(IOTIVITY_BUILD_DIR)/resource/oc_logger/include \
         -I$(IOTIVITY_BUILD_DIR)/resource/c_common \
@@ -31,7 +31,7 @@ IOTIVITY_INC_PATH = -I$(IOTIVITY_BUILD_DIR)/resource/csdk/stack/include/ \
         -I/usr/include
 endif
 
-ifeq (, $(IOTIVITY_LIB_PATH)) 
+ifeq (, $(IOTIVITY_LIB_PATH))
 ifeq ($(RELEASE), true)
 IOTIVITY_LIB_PATH = -L$(shell find . -path "*out/$(TARGET_OS)/$(TARGET_ARCH)/release/liboc.so" | xargs dirname) \
 					-L/usr/lib
@@ -60,16 +60,16 @@ libiotivity-extension.so: prepare iotivity_api.cc
 	$(SOURCES)
 
 prepare:
-	mkdir -p $(BUILD_DIR) 
+	mkdir -p $(BUILD_DIR)
 
 build_iotivity: prepare
 	@echo ''
 	@echo "***** Rebuilding IoTivity-$(IOTIVITY_VERSION) *****"
 	@echo "RELEASE = $(RELEASE) TARGET_OS=$(TARGET_OS) TARGET_ARCH=$(TARGET_ARCH)"
 	@echo ''
-ifeq (,$(wildcard $(BUILD_DIR)/iotivity-$(IOTIVITY_VERSION).tar.gz))	
-	wget https://github.com/iotivity/iotivity/archive/$(IOTIVITY_VERSION).tar.gz -O $(BUILD_DIR)/iotivity-$(IOTIVITY_VERSION).tar.gz || exit 1; 
-endif 
+ifeq (,$(wildcard $(BUILD_DIR)/iotivity-$(IOTIVITY_VERSION).tar.gz))
+	wget https://github.com/iotivity/iotivity/archive/$(IOTIVITY_VERSION).tar.gz -O $(BUILD_DIR)/iotivity-$(IOTIVITY_VERSION).tar.gz || exit 1;
+endif
 	tar xzf  $(BUILD_DIR)/iotivity-$(IOTIVITY_VERSION).tar.gz -C $(BUILD_DIR); \
 	cd $(IOTIVITY_BUILD_DIR); \
 	git clone https://github.com/01org/tinycbor.git extlibs/tinycbor/tinycbor; \

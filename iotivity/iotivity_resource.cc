@@ -40,13 +40,6 @@ IotivityResourceInit::IotivityResourceInit() {
 }
 
 IotivityResourceInit::IotivityResourceInit(const picojson::value& value) {
-  m_url = "";
-  m_deviceId = "";
-  m_connectionMode = "";
-  m_discoverable = false;
-  m_observable = false;
-  m_isSecure = false;
-
   deserialize(value);
 }
 
@@ -60,7 +53,7 @@ void IotivityResourceInit::deserialize(const picojson::value& value) {
   m_connectionMode = value.get("connectionMode").to_str();
   m_discoverable = value.get("discoverable").get<bool>();
   m_observable = value.get("observable").get<bool>();
-  m_isSecure = value.get("secure").get<bool>();
+  m_isSecure = false;
   m_resourceTypeName = "";
   m_resourceInterface = "";
   m_resourceProperty = 0;
@@ -234,8 +227,6 @@ OCStackResult IotivityResourceServer::registerResource() {
     ERROR_MSG("registerResource was unsuccessful\n");
     return result;
   }
-
-  DEBUG_MSG("registerResource handle=%f\n", m_resourceHandle);
 
   // TODO(aphao) should retrieve host IP + uri instead of int:
   // Missing C/C++ API to retrieve server resource's host url

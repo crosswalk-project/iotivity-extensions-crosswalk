@@ -34,6 +34,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <string>
 #include <map>
 #include <vector>
@@ -65,6 +66,8 @@ extern "C" {
 
 extern char *pDebugEnv;
 
+std::string getUserName();
+bool file_exist(const char *filename);
 void PrintfOcResource(const OCResource &oCResource);
 void PrintfOcRepresentation(const OCRepresentation &oCRepresentation);
 void UpdateOcRepresentation(const OCRepresentation &oCReprSource,

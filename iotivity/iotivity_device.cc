@@ -38,18 +38,21 @@
 #include "securevirtualresourcetypes.h"
 #include "srmutility.h"
 #include "pmtypes.h"
-#endif
 
-//Secure Virtual Resource database for Iotivity Client application
-//It contains Client's Identity and the PSK credentials
-//of other devices which the client trusts
-static char CRED_FILE[] = "oic_stb_db_server.json";
+const std::string JSON_FILE = "oic_xwalk_client.json";
+const std::string JSON_PATH  = "/home/" + getUserName() + "/" + JSON_FILE;
 
-FILE* xwalk_client_fopen(const char *path, const char *mode)
-{
+FILE* xwalk_client_fopen(const char *path, const char *mode) {
   (void)path;
-  return fopen(CRED_FILE, mode);
+
+  std::string CRED_FILE = "/home/" + getUserName() + "/" + JSON_FILE;
+  const char* credFile = CRED_FILE.c_str();
+
+  DEBUG_MSG("####################OPEN JSON DB XWALK IOT %s\n", credFile);
+
+  return fopen(credFile, mode);
 }
+#endif
 
 IotivityDeviceInfo::IotivityDeviceInfo() {}
 
@@ -70,7 +73,7 @@ void IotivityDeviceInfo::deserialize(const picojson::value& value) {
   DEBUG_MSG("IotivityDeviceInfo::deserialize\n");
   picojson::value properties = value.get("info");
   picojson::object& propertiesobject = properties.get<picojson::object>();
-  DEBUG_MSG("value: size=%d\n", propertiesobject.size());
+  DEBUG_MSG("value: size=%d\n", (int)propertiesobject.size());
 
   m_deviceinfomap.clear();
   for (picojson::value::object::iterator iter = propertiesobject.begin();
@@ -186,7 +189,6 @@ static OCStackResult SetDeviceInfo(OCDeviceInfo& deviceInfo, std::string name) {
 }
 
 void IotivityDevice::configure(IotivityDeviceSettings* settings) {
-  // OCPersistentStorage ps {client_open, fread, fwrite, fclose, unlink };
   OC::QualityOfService QoS = OC::QualityOfService::LowQos;
   OC::ModeType modeType = OC::ModeType::Both;
   std::string host = "0.0.0.0";
@@ -225,30 +227,53 @@ void IotivityDevice::configure(IotivityDeviceSettings* settings) {
     }
   }
 
-  static OCPersistentStorage ps = { xwalk_client_fopen, fread, fwrite, fclose, unlink };
-
-  if (OC_STACK_OK != OCRegisterPersistentStorageHandler(&ps))
+#if SECURE
+  if (!file_exist(JSON_PATH.c_str()))
   {
-    return -1;
+      std::cerr << "ERROR:: Missing JSON:" << JSON_PATH << std::endl;
+      //exit(-1);
   }
 
-  if (OCInit(NULL, 0, OC_CLIENT_SERVER) != OC_STACK_OK)
-  {
-    std::cout << "ERROR OCStack init error" << std::endl;
-    return 0;
+  static OCPersistentStorage ps = {
+    xwalk_client_fopen,
+    fread,
+    fwrite,
+    fclose,
+    unlink
+  };
+
+  int result = OCRegisterPersistentStorageHandler(&ps);
+
+  if (result != OC_STACK_OK) {
+    ERROR_MSG("OCRegisterPersistentStorageHandler error");
+    return;
+  }
+#endif
+
+  if (OCInit(NULL, 0, OC_CLIENT_SERVER) != OC_STACK_OK) {
+    ERROR_MSG("ERROR OCStack init error");
+    return;
   }
 
-  // By setting to "0.0.0.0", it binds to all available interfaces
-  // Uses randomly available port
-  // PlatformConfig cfg{ServiceType::InProc, modeType,
-  // host.c_str(), 0, QoS, &ps};
+#if SECURE
   PlatformConfig cfg{ServiceType::InProc, modeType, host.c_str(), 0, QoS, &ps};
+#else
+  PlatformConfig cfg{ServiceType::InProc, modeType, host.c_str(), 0, QoS};
+#endif
+
+  // 2-Set Platform config
+  /*
+  int ctVal = CT_ADAPTER_IP;
+  ctVal |= CA_IPV4;
+  ctVal |= CA_IPV6;
+  OCConnectivityType ct =  (OCConnectivityType) (ctVal);
+  cfg.clientConnectivity = ct;
+  cfg.serverConnectivity = ct;
+  */
+  OCPlatform::Configure(cfg);
 
   DEBUG_MSG("OCPlatform::Configure: host=%s:%d\n", host.c_str(), port);
-
   DEBUG_MSG("modeType=%d, QoS=%d\n", modeType, QoS);
-
-  OCPlatform::Configure(cfg);
 }
 
 OCStackResult IotivityDevice::configurePlatformInfo(
@@ -368,7 +393,7 @@ void IotivityDevice::handleConfigure(const picojson::value& value) {
 
   OCStackResult result = configurePlatformInfo(deviceSettings.m_deviceInfo);
 
-  if (OC_STACK_OK != result) {
+  if (result != OC_STACK_OK) {
     ERROR_MSG("Platform Info Registration was unsuccessful\n");
     postError(async_call_id);
     return;
@@ -376,7 +401,7 @@ void IotivityDevice::handleConfigure(const picojson::value& value) {
 
   result = configureDeviceInfo(deviceSettings.m_deviceInfo);
 
-  if (OC_STACK_OK != result) {
+  if (result != OC_STACK_OK) {
     ERROR_MSG("Device Info Registration was unsuccessful\n");
     postError(async_call_id);
     return;

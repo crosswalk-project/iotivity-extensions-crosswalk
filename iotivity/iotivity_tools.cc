@@ -318,13 +318,13 @@ void PicojsonPropsToOCRep(
     DEBUG_MSG("\t>>key = %s\n", key.c_str());
 
     if (value.is<bool>()) {
-       DEBUG_MSG("\tbool val\n");
+      DEBUG_MSG("\tbool val\n");
       rep[key] = value.get<bool>();
     } else if (value.is<int>()) {
-      DEBUG_MSG("\tint val\n");
+      DEBUG_MSG("\t%s is int val \n", key.c_str());
       rep[key] = static_cast<int>(value.get<double>());
     } else if (value.is<double>()) {
-      DEBUG_MSG("\tdouble val\n");
+      DEBUG_MSG("\t%s is double val\n", key.c_str());
       rep[key] = value.get<double>();
     } else if (value.is<string>()) {
       DEBUG_MSG("\tstring val\n");
@@ -467,4 +467,21 @@ int GetWait(picojson::value value) {
   }
 
   return waitsec;
+}
+
+std::string getUserName() {
+    char *p = getenv("USER");
+    std::string ret;
+
+    if (p == NULL)
+        ret = "";
+    else
+        ret =  std::string(p);
+
+    return ret;
+}
+
+bool file_exist(const char *filename) {
+    struct stat buffer;
+    return (stat(filename, &buffer) == 0);
 }

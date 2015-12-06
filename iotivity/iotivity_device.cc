@@ -40,15 +40,15 @@
 #include "pmtypes.h"
 
 const std::string JSON_FILE = "oic_xwalk_client.json";
-const std::string JSON_PATH  = "/home/" + getUserName() + "/" + JSON_FILE;
+const std::string JSON_PATH  = getUserHome() + "/" + JSON_FILE;
 
 FILE* xwalk_client_fopen(const char *path, const char *mode) {
   (void)path;
 
-  std::string CRED_FILE = "/home/" + getUserName() + "/" + JSON_FILE;
+  std::string CRED_FILE = getUserHome() + "/" + JSON_FILE;
   const char* credFile = CRED_FILE.c_str();
 
-  DEBUG_MSG("####################OPEN JSON DB XWALK IOT %s\n", credFile);
+  DEBUG_MSG("#OPEN JSON DB XWALK IOT %s\n", credFile);
 
   return fopen(credFile, mode);
 }

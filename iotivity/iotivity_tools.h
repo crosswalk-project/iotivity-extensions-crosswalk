@@ -66,7 +66,7 @@ extern "C" {
 
 extern char *pDebugEnv;
 
-std::string getUserName();
+std::string getUserHome();
 bool file_exist(const char *filename);
 void PrintfOcResource(const OCResource &oCResource);
 void PrintfOcRepresentation(const OCRepresentation &oCRepresentation);

@@ -469,8 +469,8 @@ int GetWait(picojson::value value) {
   return waitsec;
 }
 
-std::string getUserName() {
-    char *p = getenv("USER");
+std::string getUserHome() {
+    char *p = getenv("HOME");
     std::string ret;
 
     if (p == NULL)

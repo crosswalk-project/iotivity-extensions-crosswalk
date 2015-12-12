@@ -309,7 +309,7 @@ void UpdateOcRepresentation(const OCRepresentation& oCReprSource,
 void PicojsonPropsToOCRep(
     OCRepresentation &rep,
     picojson::object &props) {
-  DEBUG_MSG(">>PicojsonPropsToOCReps \n");
+  DEBUG_MSG(">>PicojsonPropsToOCRep \n");
   for (picojson::value::object::iterator piter = props.begin();
      piter != props.end(); ++piter) {
     std::string key = piter->first;

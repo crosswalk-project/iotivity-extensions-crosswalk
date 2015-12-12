@@ -376,30 +376,18 @@ void IotivityClient::handleFindDevices(const picojson::value &value) {
   // if resourceId is null, and deviceId not,
   // then only resources from that device are returned
   std::string deviceId = "";
-  std::string resourceId = "";
-  std::string resourceType = "";
   int waitsec = GetWait(value);
 
   if (param.contains("deviceId")) {
     deviceId = param.get("deviceId").to_str();
   }
 
-  if (param.contains("resourceId")) {
-    resourceId = param.get("resourceId").to_str();
-  }
-
-  if (param.contains("resourceType")) {
-    resourceType = param.get("resourceType").to_str();
-  }
 
   DEBUG_MSG(
     "###handleFindDevices: device = %s\n"
-    "\tresource = %s\n"
-    "\tresourceType = %s\n"
     "\ttimeout = %d\n",
-    deviceId.c_str(), resourceId.c_str(), resourceType.c_str(), waitsec);
+    deviceId.c_str(), waitsec);
 
-  DEBUG_MSG("will  clear devicemap 1\n");
   for (auto const &entity : m_founddevicemap) {
     IotivityDeviceInfo *deviceInfo = entity.second;
     delete deviceInfo;
@@ -573,12 +561,12 @@ void IotivityClient::handleUpdateResource(const picojson::value &value) {
   DEBUG_MSG("handleUpdateResource: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
-  bool doPost = value.get("doPost").get<bool>();
   picojson::value param = value.get("OicResource");
   std::string resId = param.get("id").to_str();
   IotivityResourceClient *resClient = getResourceById(resId);
 
   if (resClient != NULL) {
+    bool doPost = value.get("doPost").get<bool>();
     IotivityResourceInit oicResourceInit(param);
 
     OCStackResult result;

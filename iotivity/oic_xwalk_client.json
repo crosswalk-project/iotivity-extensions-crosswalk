@@ -7,7 +7,11 @@
                 "/oic/res/d",
                 "/oic/d",
                 "/oic/p",
-                "/oic/res/types/d"
+                "/oic/res/types/d",
+                "/oic/ad",
+                "/oic/sec/acl",
+                "/oic/sec/svc",
+                "/oic/sec/amacl"
             ],
             "perms": 2,
             "ownrs" : ["T0lDX1hXS19DTElFTlRfMQ=="]
@@ -17,7 +21,6 @@
             "rsrc": [
                 "/oic/sec/doxm",
                 "/oic/sec/pstat",
-                "/oic/sec/acl",
                 "/oic/sec/cred"
              ],
              "perms": 6,
@@ -28,10 +31,10 @@
         "isop": false,
         "deviceid": "T0lDX1hXS19DTElFTlRfMQ==",
         "ch": 0,
-        "cm":   0,
-        "tm":   0,
-        "om":   3,
-        "sm":   [3]
+        "cm": 0,
+        "tm": 0,
+        "om": 3,
+        "sm": [3]
     },
     "doxm": {
         "oxm":  [0],

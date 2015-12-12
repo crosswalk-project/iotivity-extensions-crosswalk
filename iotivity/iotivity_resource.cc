@@ -580,7 +580,7 @@ OCStackResult IotivityResourceClient::startObserving(double asyncCallId) {
               std::placeholders::_2, std::placeholders::_3,
               std::placeholders::_4, asyncCallId);
 
-  result = m_ocResourcePtr->observe(ObserveType::ObserveAll, QueryParamsMap(),
+  result = m_ocResourcePtr->observe(ObserveType::Observe, QueryParamsMap(),
                                     observeHandler);
   if (OC_STACK_OK != result) {
     ERROR_MSG("observe was unsuccessful\n");

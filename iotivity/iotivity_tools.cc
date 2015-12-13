@@ -33,80 +33,80 @@
 char* pDebugEnv = NULL;
 
 void PrintfOcResource(const OCResource& oCResource) {
-  DEBUG_MSG("PrintfOcResource\n");
-  DEBUG_MSG("\tRes[sId] = %s\n", oCResource.sid().c_str());
-  DEBUG_MSG("\tRes[Uri] = %s\n", oCResource.uri().c_str());
-  DEBUG_MSG("\tRes[Host] = %s\n", oCResource.host().c_str());
-  DEBUG_MSG("\tRes[Resource types]:\n");
+  OC_LOG_V(DEBUG, TAG,"PrintfOcResource\n");
+  OC_LOG_V(DEBUG, TAG,"\tRes[sId] = %s\n", oCResource.sid().c_str());
+  OC_LOG_V(DEBUG, TAG,"\tRes[Uri] = %s\n", oCResource.uri().c_str());
+  OC_LOG_V(DEBUG, TAG,"\tRes[Host] = %s\n", oCResource.host().c_str());
+  OC_LOG_V(DEBUG, TAG,"\tRes[Resource types]:\n");
 
   for (const auto& resourceTypes : oCResource.getResourceTypes()) {
-    DEBUG_MSG("\t\t%s\n", resourceTypes.c_str());
+    OC_LOG_V(DEBUG, TAG,"\t\t%s\n", resourceTypes.c_str());
   }
 
-  DEBUG_MSG("Res[Resource interfaces] \n");
+  OC_LOG_V(DEBUG, TAG,"Res[Resource interfaces] \n");
 
   for (const auto& resourceInterfaces : oCResource.getResourceInterfaces()) {
-    DEBUG_MSG("\t\t%s\n", resourceInterfaces.c_str());
+    OC_LOG_V(DEBUG, TAG,"\t\t%s\n", resourceInterfaces.c_str());
   }
 }
 
 void PrintfOcRepresentation(const OCRepresentation& oCRepr) {
-  DEBUG_MSG(">>PrintfOcRepresentation:\n");
+  OC_LOG_V(DEBUG, TAG,">>PrintfOcRepresentation:\n");
 
   std::string uri = oCRepr.getUri();
-  DEBUG_MSG("\turi=%s\n", uri.c_str());
+  OC_LOG_V(DEBUG, TAG,"\turi=%s\n", uri.c_str());
 
   // IOT-828
-  // DEBUG_MSG("\thost=%s\n", oCRepr.getHost().c_str());
+  // OC_LOG_V(DEBUG, TAG,"\thost=%s\n", oCRepr.getHost().c_str());
 
-  DEBUG_MSG("\ttypes=%s\n", uri.c_str());
+  OC_LOG_V(DEBUG, TAG,"\ttypes=%s\n", uri.c_str());
   for (const auto& resourceTypes : oCRepr.getResourceTypes()) {
-    DEBUG_MSG("\t\t%s\n", resourceTypes.c_str());
+    OC_LOG_V(DEBUG, TAG,"\t\t%s\n", resourceTypes.c_str());
   }
 
-  DEBUG_MSG("\tinterfaces=%s\n", uri.c_str());
+  OC_LOG_V(DEBUG, TAG,"\tinterfaces=%s\n", uri.c_str());
   for (const auto& resourceInterfaces : oCRepr.getResourceInterfaces()) {
-    DEBUG_MSG("\t\t%s\n", resourceInterfaces.c_str());
+    OC_LOG_V(DEBUG, TAG,"\t\t%s\n", resourceInterfaces.c_str());
   }
 
   for (const auto& cur : oCRepr) {
     std::string attrname = cur.attrname();
-    DEBUG_MSG("\tattr  key=%s\n", attrname.c_str());
+    OC_LOG_V(DEBUG, TAG,"\tattr  key=%s\n", attrname.c_str());
 
     if (AttributeType::String == cur.type()) {
       std::string curStr = cur.getValue<string>();
-      DEBUG_MSG("\tRep[String]: key=%s, value=%s\n", attrname.c_str(),
+      OC_LOG_V(DEBUG, TAG,"\tRep[String]: key=%s, value=%s\n", attrname.c_str(),
                 curStr.c_str());
     } else if (AttributeType::Integer == cur.type()) {
-      DEBUG_MSG("\tRep[Integer]: key=%s, value=%d\n", attrname.c_str(),
+      OC_LOG_V(DEBUG, TAG,"\tRep[Integer]: key=%s, value=%d\n", attrname.c_str(),
                 cur.getValue<int>());
     } else if (AttributeType::Double == cur.type()) {
-      DEBUG_MSG("\tRep[Double]: key=%s, value=%f\n", attrname.c_str(),
+      OC_LOG_V(DEBUG, TAG,"\tRep[Double]: key=%s, value=%f\n", attrname.c_str(),
                 cur.getValue<double>());
     } else if (AttributeType::Boolean == cur.type()) {
-      DEBUG_MSG("\tRep[Boolean]: key=%s, value=%d\n", attrname.c_str(),
+      OC_LOG_V(DEBUG, TAG,"\tRep[Boolean]: key=%s, value=%d\n", attrname.c_str(),
                 cur.getValue<bool>());
     } else if (AttributeType::OCRepresentation == cur.type()) {
-      DEBUG_MSG("\tRep[OCRepresentation]: key=%s, value=%s\n",
+      OC_LOG_V(DEBUG, TAG,"\tRep[OCRepresentation]: key=%s, value=%s\n",
                 attrname.c_str(), "OCRep");
       PrintfOcRepresentation(cur.getValue<OCRepresentation>());
     } else if (AttributeType::Vector == cur.type()) {
-      DEBUG_MSG("\tRep[OCRepresentation]: key=%s, value=%s\n",
+      OC_LOG_V(DEBUG, TAG,"\tRep[OCRepresentation]: key=%s, value=%s\n",
                 attrname.c_str(), "Vector");
       if (cur.base_type() == AttributeType::OCRepresentation) {
-        DEBUG_MSG("\tVector of OCRepresentation\n");
+        OC_LOG_V(DEBUG, TAG,"\tVector of OCRepresentation\n");
 
         std::vector<OCRepresentation> v =
           cur.getValue<std::vector<OCRepresentation>>();
         for (const auto& curv : v) {
-          DEBUG_MSG("\t>>Print sub OCRepresentation\n");
+          OC_LOG_V(DEBUG, TAG,"\t>>Print sub OCRepresentation\n");
           PrintfOcRepresentation(curv);
-          DEBUG_MSG("\t<<Print sub OCRepresentation\n");
+          OC_LOG_V(DEBUG, TAG,"\t<<Print sub OCRepresentation\n");
         }
       }
     }
   }
-  DEBUG_MSG("<<PrintfOcRepresentation:\n");
+  OC_LOG_V(DEBUG, TAG,"<<PrintfOcRepresentation:\n");
 }
 
 static void UpdateDestOcRepresentationString(OCRepresentation& oCReprDest,
@@ -118,10 +118,10 @@ static void UpdateDestOcRepresentationString(OCRepresentation& oCReprDest,
       if (AttributeType::String == cur.type()) {
         std::string oldValue = cur.getValue<string>();
         cur = value;
-        DEBUG_MSG("Updated[%s] old=%s, new=%s\n", attrname.c_str(),
+        OC_LOG_V(DEBUG, TAG,"Updated[%s] old=%s, new=%s\n", attrname.c_str(),
                   oldValue.c_str(), value.c_str());
       } else {
-        DEBUG_MSG("Updated[%s] mismatch String\n", attrname.c_str());
+        OC_LOG_V(DEBUG, TAG,"Updated[%s] mismatch String\n", attrname.c_str());
         return;
       }
     }
@@ -137,16 +137,16 @@ static void UpdateDestOcRepresentationInt(OCRepresentation& oCReprDest,
       if (AttributeType::Integer == cur.type()) {
         int oldValue = cur.getValue<int>();
         cur = value;
-        DEBUG_MSG("Updated[%s] old=%d, new=%d\n", attrname.c_str(), oldValue,
+        OC_LOG_V(DEBUG, TAG,"Updated[%s] old=%d, new=%d\n", attrname.c_str(), oldValue,
                   value);
       } else if (AttributeType::Double == cur.type()) {
         // Force int to double
         double oldValue = cur.getValue<double>();
         cur = value;
-        DEBUG_MSG("F-Updated[%s] old=%f, new=%d\n", attrname.c_str(), oldValue,
+        OC_LOG_V(DEBUG, TAG,"F-Updated[%s] old=%f, new=%d\n", attrname.c_str(), oldValue,
                   value);
       } else {
-        DEBUG_MSG("Updated[%s] mismatch Int\n", attrname.c_str());
+        OC_LOG_V(DEBUG, TAG,"Updated[%s] mismatch Int\n", attrname.c_str());
         return;
       }
     }
@@ -162,10 +162,10 @@ static void UpdateDestOcRepresentationBool(OCRepresentation& oCReprDest,
       if (AttributeType::Boolean == cur.type()) {
         bool oldValue = cur.getValue<bool>();
         cur = value;
-        DEBUG_MSG("Updated[%s] old=%d, new=%d\n", attrname.c_str(), oldValue,
+        OC_LOG_V(DEBUG, TAG,"Updated[%s] old=%d, new=%d\n", attrname.c_str(), oldValue,
                   value);
       } else {
-        DEBUG_MSG("Updated[%s] mismatch Bool\n", attrname.c_str());
+        OC_LOG_V(DEBUG, TAG,"Updated[%s] mismatch Bool\n", attrname.c_str());
         return;
       }
     }
@@ -181,15 +181,15 @@ static void UpdateDestOcRepresentationDouble(OCRepresentation& oCReprDest,
       if (AttributeType::Double == cur.type()) {
         double oldValue = cur.getValue<double>();
         cur = value;
-        DEBUG_MSG("Updated[%s] old=%f, new=%f\n", attrname.c_str(), oldValue,
+        OC_LOG_V(DEBUG, TAG,"Updated[%s] old=%f, new=%f\n", attrname.c_str(), oldValue,
                   value);
       } else if (AttributeType::Integer == cur.type()) {
         int oldValue = cur.getValue<int>();
         cur = value;
-        DEBUG_MSG("F-Updated[%s] old=%d, new=%f\n", attrname.c_str(), oldValue,
+        OC_LOG_V(DEBUG, TAG,"F-Updated[%s] old=%d, new=%f\n", attrname.c_str(), oldValue,
                   value);
       } else {
-        DEBUG_MSG("Updated[%s] mismatch Double\n", attrname.c_str());
+        OC_LOG_V(DEBUG, TAG,"Updated[%s] mismatch Double\n", attrname.c_str());
         return;
       }
     }
@@ -205,11 +205,11 @@ static void UpdateDestOcRepresentationOCRep(OCRepresentation& oCReprDest,
       if (AttributeType::OCRepresentation == cur.type()) {
         OCRepresentation oldValue = cur.getValue<OCRepresentation>();
         cur = value;
-        DEBUG_MSG("Updated[%s] old=%s, new=%s\n", attrname.c_str(),
+        OC_LOG_V(DEBUG, TAG,"Updated[%s] old=%s, new=%s\n", attrname.c_str(),
                   oldValue.getUri().c_str(),
                   value.getUri().c_str());
       } else {
-        DEBUG_MSG("Updated[%s] mismatch OCRepresentation\n", attrname.c_str());
+        OC_LOG_V(DEBUG, TAG,"Updated[%s] mismatch OCRepresentation\n", attrname.c_str());
         return;
       }
     }
@@ -219,48 +219,48 @@ static void UpdateDestOcRepresentationOCRep(OCRepresentation& oCReprDest,
 void UpdateOcRepresentation(const OCRepresentation& oCReprSource,
                             OCRepresentation& oCReprDest,
                             std::vector<std::string>& updatedPropertyNames) {
-  DEBUG_MSG("\n\nUpdateOcRepresentation: Source\n");
+  OC_LOG_V(DEBUG, TAG,"\n\nUpdateOcRepresentation: Source\n");
   PrintfOcRepresentation(oCReprSource);
 
-  DEBUG_MSG("UpdateOcRepresentation: Destination\n");
+  OC_LOG_V(DEBUG, TAG,"UpdateOcRepresentation: Destination\n");
   PrintfOcRepresentation(oCReprDest);
 
   std::vector<std::string> foundPropertyNames;
   for (auto& cur : oCReprSource) {
     std::string attrname = cur.attrname();
 
-    DEBUG_MSG("SRC attrname=%s\n", attrname.c_str());
+    OC_LOG_V(DEBUG, TAG,"SRC attrname=%s\n", attrname.c_str());
 
     AttributeValue destAttrValue;
     if (oCReprDest.getAttributeValue(attrname, destAttrValue) == false) {
-      DEBUG_MSG("DST attrname=%s NOT FOUND !!!\n", attrname.c_str());
+      OC_LOG_V(DEBUG, TAG,"DST attrname=%s NOT FOUND !!!\n", attrname.c_str());
       continue;
     }
 
     if (std::find(updatedPropertyNames.begin(), updatedPropertyNames.end(),
                   attrname) != updatedPropertyNames.end()) {
       if (AttributeType::String == cur.type()) {
-        DEBUG_MSG("cur.type String\n");
+        OC_LOG_V(DEBUG, TAG,"cur.type String\n");
         std::string newValue = cur.getValue<string>();
         UpdateDestOcRepresentationString(oCReprDest, attrname, newValue);
       } else if (AttributeType::Integer == cur.type()) {
-        DEBUG_MSG("cur.type Integer\n");
+        OC_LOG_V(DEBUG, TAG,"cur.type Integer\n");
         int newValue = cur.getValue<int>();
         UpdateDestOcRepresentationInt(oCReprDest, attrname, newValue);
       } else if (AttributeType::Boolean == cur.type()) {
-        DEBUG_MSG("cur.type Boolean\n");
+        OC_LOG_V(DEBUG, TAG,"cur.type Boolean\n");
         bool newValue = cur.getValue<bool>();
         UpdateDestOcRepresentationBool(oCReprDest, attrname, newValue);
       } else if (AttributeType::Double == cur.type()) {
-        DEBUG_MSG("cur.type Double\n");
+        OC_LOG_V(DEBUG, TAG,"cur.type Double\n");
         double newValue = cur.getValue<double>();
         UpdateDestOcRepresentationDouble(oCReprDest, attrname, newValue);
       } else if (AttributeType::OCRepresentation == cur.type()) {
-        DEBUG_MSG("cur.type OcRepresentation\n");
+        OC_LOG_V(DEBUG, TAG,"cur.type OcRepresentation\n");
         OCRepresentation newValue = cur.getValue<OCRepresentation>();
         UpdateDestOcRepresentationOCRep(oCReprDest, attrname, newValue);
       } else if (AttributeType::Vector == cur.type()) {
-        DEBUG_MSG("cur.type Vector\n");
+        OC_LOG_V(DEBUG, TAG,"cur.type Vector\n");
 
         if (AttributeType::Integer == cur.base_type()) {
           std::vector<int> newValue = cur.getValue<std::vector<int>>();
@@ -309,33 +309,33 @@ void UpdateOcRepresentation(const OCRepresentation& oCReprSource,
 void PicojsonPropsToOCRep(
     OCRepresentation &rep,
     picojson::object &props) {
-  DEBUG_MSG(">>PicojsonPropsToOCRep \n");
+  OC_LOG_V(DEBUG, TAG,">>PicojsonPropsToOCRep \n");
   for (picojson::value::object::iterator piter = props.begin();
      piter != props.end(); ++piter) {
     std::string key = piter->first;
     picojson::value value = piter->second;
 
-    DEBUG_MSG("\t>>key = %s\n", key.c_str());
+    OC_LOG_V(DEBUG, TAG,"\t>>key = %s\n", key.c_str());
 
     if (value.is<bool>()) {
-      DEBUG_MSG("\tbool val\n");
+      OC_LOG_V(DEBUG, TAG,"\tbool val\n");
       rep[key] = value.get<bool>();
     } else if (value.is<int>()) {
-      DEBUG_MSG("\t%s is int val \n", key.c_str());
+      OC_LOG_V(DEBUG, TAG,"\t%s is int val \n", key.c_str());
       rep[key] = static_cast<int>(value.get<double>());
     } else if (value.is<double>()) {
-      DEBUG_MSG("\t%s is double val\n", key.c_str());
+      OC_LOG_V(DEBUG, TAG,"\t%s is double val\n", key.c_str());
       rep[key] = value.get<double>();
     } else if (value.is<string>()) {
-      DEBUG_MSG("\tstring val\n");
+      OC_LOG_V(DEBUG, TAG,"\tstring val\n");
       rep[key] = value.get<string>();
     } else if (value.is<picojson::array>()) {
-      DEBUG_MSG("\tarray val\n");
+      OC_LOG_V(DEBUG, TAG,"\tarray val\n");
       picojson::array array = value.get<picojson::array>();
       picojson::array::iterator iter = array.begin();
 
       if ((*iter).is<bool>()) {
-        DEBUG_MSG("\t\tbool base_type\n");
+        OC_LOG_V(DEBUG, TAG,"\t\tbool base_type\n");
         std::vector<bool> v;
         for (; iter != array.end(); ++iter) {
           if ((*iter).is<bool>()) {
@@ -344,7 +344,7 @@ void PicojsonPropsToOCRep(
         }
         rep[key] = v;
       } else if ((*iter).is<int>()) {
-        DEBUG_MSG("\t\tint base_type\n");
+        OC_LOG_V(DEBUG, TAG,"\t\tint base_type\n");
         std::vector<int> v;
         for (; iter != array.end(); ++iter) {
           if ((*iter).is<int>()) {
@@ -353,7 +353,7 @@ void PicojsonPropsToOCRep(
         }
         rep[key] = v;
       } else if ((*iter).is<double>()) {
-        DEBUG_MSG("\t\tdouble base_type\n");
+        OC_LOG_V(DEBUG, TAG,"\t\tdouble base_type\n");
         std::vector<double> v;
         for (; iter != array.end(); ++iter) {
           if ((*iter).is<double>()) {
@@ -362,7 +362,7 @@ void PicojsonPropsToOCRep(
         }
         rep[key] = v;
       } else if ((*iter).is<string>()) {
-        DEBUG_MSG("\t\tstring base_type\n");
+        OC_LOG_V(DEBUG, TAG,"\t\tstring base_type\n");
         std::vector<std::string> v;
         for (; iter != array.end(); ++iter) {
           if ((*iter).is<string>()) {
@@ -371,7 +371,7 @@ void PicojsonPropsToOCRep(
         }
         rep[key] = v;
       } else if ((*iter).is<picojson::object>()) {
-        DEBUG_MSG("\t\tobject base_type\n");
+        OC_LOG_V(DEBUG, TAG,"\t\tobject base_type\n");
         std::vector<OCRepresentation> v;
         for (; iter != array.end(); ++iter) {
           OCRepresentation repi;
@@ -382,9 +382,9 @@ void PicojsonPropsToOCRep(
         rep[key] = v;
       }
     }
-    DEBUG_MSG("\t<<key = %s\n", key.c_str());
+    OC_LOG_V(DEBUG, TAG,"\t<<key = %s\n", key.c_str());
   }
-  DEBUG_MSG("<<PicojsonPropsToOCReps after:\n");
+  OC_LOG_V(DEBUG, TAG,"<<PicojsonPropsToOCReps after:\n");
   PrintfOcRepresentation(rep);
 }
 
@@ -413,7 +413,7 @@ void TranslateOCRepresentationToPicojson(const OCRepresentation& oCRepr,
       TranslateOCRepresentationToPicojson(ocrValue, picoRep);
       objectRes[attrname] = picojson::value(picoRep);
     } else if (AttributeType::Vector == cur.type()) {
-      DEBUG_MSG("\tTranslateArrayToPicojson\n");
+      OC_LOG_V(DEBUG, TAG,"\tTranslateArrayToPicojson\n");
       picojson::array array;
 
       if (cur.base_type() == AttributeType::OCRepresentation) {

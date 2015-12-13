@@ -52,16 +52,11 @@ using namespace std;  // NOLINT
 
 #ifdef __cplusplus
 extern "C" {
+	#include "logger.h"
 #endif
 
-#define INFO_MSG(msg, ...) \
-  { printf(msg, ##__VA_ARGS__); }
-#define DEBUG_MSG(msg, ...)                    \
-  {                                            \
-    if (pDebugEnv) printf(msg, ##__VA_ARGS__); \
-  }
-#define ERROR_MSG(msg) \
-  { std::cerr << msg << std::endl; }
+static const char TAG[] = "IoT-Ext-Xwalk";
+
 #define SUCCESS_RESPONSE 0
 
 extern char *pDebugEnv;

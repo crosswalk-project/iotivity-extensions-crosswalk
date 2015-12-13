@@ -48,7 +48,7 @@ IotivityResourceServer* IotivityServer::getResourceById(std::string id) {
 }
 
 void IotivityServer::handleRegisterResource(const picojson::value& value) {
-  DEBUG_MSG("handleRegisterResource: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG,"handleRegisterResource: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
   IotivityResourceInit* resInit =
@@ -73,7 +73,7 @@ void IotivityServer::handleRegisterResource(const picojson::value& value) {
 }
 
 void IotivityServer::handleUnregisterResource(const picojson::value& value) {
-  DEBUG_MSG("handleUnregisterResource: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG,"handleUnregisterResource: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
   std::string resId = value.get("resourceId").to_str();
@@ -82,7 +82,7 @@ void IotivityServer::handleUnregisterResource(const picojson::value& value) {
   IotivityResourceServer* resServer = getResourceById(resId);
 
   if (resServer == NULL) {
-    ERROR_MSG("handleUnregisterResource, resource not found\n");
+    OC_LOG_V(ERROR, TAG, "handleUnregisterResource, resource not found\n");
     m_device->postError(async_call_id);
     return;
   }
@@ -92,7 +92,7 @@ void IotivityServer::handleUnregisterResource(const picojson::value& value) {
   OCStackResult result = OCPlatform::unregisterResource(resHandle);
 
   if (OC_STACK_OK != result) {
-    ERROR_MSG("OCPlatform::unregisterResource was unsuccessful\n");
+    OC_LOG_V(ERROR, TAG, "OCPlatform::unregisterResource was unsuccessful\n");
     m_device->postError(async_call_id);
     return;
   }
@@ -104,14 +104,14 @@ void IotivityServer::handleUnregisterResource(const picojson::value& value) {
 }
 
 void IotivityServer::handleEnablePresence(const picojson::value& value) {
-  DEBUG_MSG("handleEnablePresence: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG,"handleEnablePresence: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
   unsigned int ttl = 0;  // default
   OCStackResult result = OCPlatform::startPresence(ttl);
 
   if (OC_STACK_OK != result) {
-    ERROR_MSG("OCPlatform::startPresence was unsuccessful\n");
+    OC_LOG_V(ERROR, TAG, "OCPlatform::startPresence was unsuccessful\n");
     m_device->postError(async_call_id);
     return;
   }
@@ -120,13 +120,13 @@ void IotivityServer::handleEnablePresence(const picojson::value& value) {
 }
 
 void IotivityServer::handleDisablePresence(const picojson::value& value) {
-  DEBUG_MSG("handleDisablePresence: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG,"handleDisablePresence: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
   OCStackResult result = OCPlatform::stopPresence();
 
   if (OC_STACK_OK != result) {
-    ERROR_MSG("OCPlatform::stopPresence was unsuccessful\n");
+    OC_LOG_V(ERROR, TAG, "OCPlatform::stopPresence was unsuccessful\n");
     m_device->postError(async_call_id);
     return;
   }
@@ -135,7 +135,7 @@ void IotivityServer::handleDisablePresence(const picojson::value& value) {
 }
 
 void IotivityServer::handleNotify(const picojson::value& value) {
-  DEBUG_MSG("handleNotify: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG,"handleNotify: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
   std::string resId = value.get("resourceId").to_str();
@@ -145,7 +145,7 @@ void IotivityServer::handleNotify(const picojson::value& value) {
   IotivityResourceServer* resServer = getResourceById(resId);
 
   if (resServer == NULL) {
-    ERROR_MSG("handleNotify, resource not found was unsuccessful\n");
+    OC_LOG_V(ERROR, TAG, "handleNotify, resource not found was unsuccessful\n");
     m_device->postError(async_call_id);
     return;
   }
@@ -163,7 +163,7 @@ void IotivityServer::handleNotify(const picojson::value& value) {
     OCStackResult result =
         OCPlatform::notifyListOfObservers(resHandle, observationIds, pResponse);
     if (OC_STACK_OK != result) {
-      ERROR_MSG("OCPlatform::notifyAllObservers was unsuccessful\n");
+      OC_LOG_V(ERROR, TAG, "OCPlatform::notifyAllObservers was unsuccessful\n");
       m_device->postError(async_call_id);
       return;
     }

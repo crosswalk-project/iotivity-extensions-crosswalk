@@ -50,7 +50,7 @@ IotivityClient::~IotivityClient() {
 
 void IotivityClient::foundResourceCallback(std::shared_ptr<OCResource> resource,
     const picojson::value& value) {
-  DEBUG_MSG("\n###foundResourceCallback:\n");
+  OC_LOG_V(DEBUG, TAG,"\n###foundResourceCallback:\n");
   picojson::value param = value.get("OicDiscoveryOptions");
   std::string deviceId = "";
 
@@ -76,7 +76,7 @@ void IotivityClient::foundResourceCallback(std::shared_ptr<OCResource> resource,
 }
 
 void IotivityClient::findDevicePreparedRequest(const picojson::value& value) {
-  DEBUG_MSG("findDevicePreparedRequest\n");
+  OC_LOG_V(DEBUG, TAG,"findDevicePreparedRequest\n");
 
   std::lock_guard<std::mutex> lock(m_callbackLockDevices);
   picojson::value::object object;
@@ -143,7 +143,7 @@ void IotivityClient::findResourceTimerCallback(const picojson::value &value) {
 
 void IotivityClient::foundDeviceCallback(const OCRepresentation &rep,
     const picojson::value &value) {
-  DEBUG_MSG("\n###foundDeviceCallback:\n");
+  OC_LOG_V(DEBUG, TAG,"\n###foundDeviceCallback:\n");
   int waitsec = GetWait(value);
   std::string val;
   std::string values[] = {
@@ -153,7 +153,7 @@ void IotivityClient::foundDeviceCallback(const OCRepresentation &rep,
 
   for (unsigned int i = 0; i < sizeof(values) / sizeof(values[0]); i += 2) {
     if (rep.getValue(values[i], val)) {
-      DEBUG_MSG("\t%s:%s\n", values[i + 1].c_str(), val.c_str());
+      OC_LOG_V(DEBUG, TAG,"\t%s:%s\n", values[i + 1].c_str(), val.c_str());
     }
   }
 
@@ -190,7 +190,7 @@ void IotivityClient::foundDeviceCallback(const OCRepresentation &rep,
     std::string hostUri = rep.getHost();  //  unicast
     std::string platformDiscoveryRequest = "/oic/p";
 
-    DEBUG_MSG("process: hostUri=%s, uri1=%s, timeout=%ds devId=%s\n",
+    OC_LOG_V(DEBUG, TAG,"process: hostUri=%s, uri1=%s, timeout=%ds devId=%s\n",
               hostUri.c_str(), platformDiscoveryRequest.c_str(),
               waitsec, deviceUUID.c_str());
 
@@ -202,7 +202,7 @@ void IotivityClient::foundDeviceCallback(const OCRepresentation &rep,
                            CT_ADAPTER_IP, platformInfoHandler);
 
     if (OC_STACK_OK != result) {
-      ERROR_MSG("OCPlatform::getPlatformInfo was unsuccessful\n");
+      OC_LOG_V(ERROR, TAG, "OCPlatform::getPlatformInfo was unsuccessful\n");
       double async_call_id = value.get("asyncCallId").get<double>();
       m_device->postError(async_call_id);
       return;
@@ -217,7 +217,7 @@ void IotivityClient::foundDeviceCallback(const OCRepresentation &rep,
 
 void IotivityClient::foundPlatformCallback(const OCRepresentation &rep,
     const std::string &deviceUUID) {
-  DEBUG_MSG("\n###foundPlatformCallback devId:%s\n", deviceUUID.c_str());
+  OC_LOG_V(DEBUG, TAG,"\n###foundPlatformCallback devId:%s\n", deviceUUID.c_str());
 
   std::string val;
   std::string values[] = {
@@ -236,7 +236,7 @@ void IotivityClient::foundPlatformCallback(const OCRepresentation &rep,
 
   for (unsigned int i = 0; i < sizeof(values) / sizeof(values[0]); i += 2) {
     if (rep.getValue(values[i], val)) {
-      DEBUG_MSG("\t%s:%s\n", values[i + 1].c_str(), val.c_str());
+      OC_LOG_V(DEBUG, TAG,"\t%s:%s\n", values[i + 1].c_str(), val.c_str());
     }
   }
 
@@ -294,7 +294,7 @@ void IotivityClient::foundPlatformCallback(const OCRepresentation &rep,
 }
 
 IotivityResourceClient *IotivityClient::getResourceById(std::string id) {
-  DEBUG_MSG("getResourceById: id=%s\n", id.c_str());
+  OC_LOG_V(DEBUG, TAG,"getResourceById: id=%s\n", id.c_str());
   if (m_resourcemap.size()) {
     std::map<std::string, IotivityResourceClient *>::const_iterator it;
     if ((it = m_resourcemap.find(id)) != m_resourcemap.end()) {
@@ -306,7 +306,7 @@ IotivityResourceClient *IotivityClient::getResourceById(std::string id) {
 }
 
 void IotivityClient::handleCancelObserving(const picojson::value &value) {
-  DEBUG_MSG("handleCancelObserving: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG,"handleCancelObserving: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
   std::string resId = value.get("id").to_str();
@@ -327,7 +327,7 @@ void IotivityClient::handleCancelObserving(const picojson::value &value) {
 
 void IotivityClient::handleCreateResource(const picojson::value &value) {
   // Post + particular data
-  DEBUG_MSG("handleCreateResource: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG,"handleCreateResource: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
   IotivityResourceInit oicResourceInit(value.get("OicResourceInit"));
@@ -347,7 +347,7 @@ void IotivityClient::handleCreateResource(const picojson::value &value) {
 }
 
 void IotivityClient::handleDeleteResource(const picojson::value &value) {
-  DEBUG_MSG("handleDeleteResource: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG,"handleDeleteResource: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
   std::string resId = value.get("id").to_str();
@@ -365,7 +365,7 @@ void IotivityClient::handleDeleteResource(const picojson::value &value) {
 }
 
 void IotivityClient::handleFindDevices(const picojson::value &value) {
-  DEBUG_MSG("handleFindDevices: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG,"handleFindDevices: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
   picojson::value param = value.get("OicDiscoveryOptions");
@@ -383,7 +383,7 @@ void IotivityClient::handleFindDevices(const picojson::value &value) {
   }
 
 
-  DEBUG_MSG(
+  OC_LOG_V(DEBUG, TAG,
     "###handleFindDevices: device = %s\n"
     "\ttimeout = %d\n",
     deviceId.c_str(), waitsec);
@@ -400,7 +400,7 @@ void IotivityClient::handleFindDevices(const picojson::value &value) {
   std::string deviceDiscoveryRequest = OC_MULTICAST_PREFIX +
                                        deviceDiscoveryURI;
 
-  DEBUG_MSG("process: hostUri=%s, uri1=%s, timeout=%ds\n",
+  OC_LOG_V(DEBUG, TAG,"process: hostUri=%s, uri1=%s, timeout=%ds\n",
             hostUri.c_str(), deviceDiscoveryRequest.c_str(), waitsec);
 
   FindDeviceCallback deviceInfoHandler =
@@ -411,7 +411,7 @@ void IotivityClient::handleFindDevices(const picojson::value &value) {
                          deviceDiscoveryRequest,
                          CT_ADAPTER_IP, deviceInfoHandler);
   if (OC_STACK_OK != result) {
-    ERROR_MSG("OCPlatform::getDeviceInfo was unsuccessful\n");
+    OC_LOG_V(ERROR, TAG, "OCPlatform::getDeviceInfo was unsuccessful\n");
     m_device->postError(async_call_id);
     return;
   }
@@ -426,7 +426,7 @@ void IotivityClient::handleFindDevices(const picojson::value &value) {
 }
 
 void IotivityClient::handleFindResources(const picojson::value &value) {
-  DEBUG_MSG("handleFindResources: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG,"handleFindResources: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
   picojson::value param = value.get("OicDiscoveryOptions");
@@ -453,7 +453,7 @@ void IotivityClient::handleFindResources(const picojson::value &value) {
     resourceType = param.get("resourceType").to_str();
   }
 
-  DEBUG_MSG(
+  OC_LOG_V(DEBUG, TAG,
     "handleFindResources: device = %s\n"
     "\tresource = %s\n"
     "\tresourceType = %s\n"
@@ -476,7 +476,7 @@ void IotivityClient::handleFindResources(const picojson::value &value) {
     if (resourceId != "") {
       IotivityResourceClient *resClient = getResourceById(resourceId);
       if (resClient == NULL) {
-        ERROR_MSG("OCPlatform::findResource by resourceId was unsuccessful\n");
+        OC_LOG_V(ERROR, TAG, "OCPlatform::findResource by resourceId was unsuccessful\n");
         m_device->postError(async_call_id);
         return;
       } else {
@@ -487,7 +487,7 @@ void IotivityClient::handleFindResources(const picojson::value &value) {
     }
   }
 
-  DEBUG_MSG(
+  OC_LOG_V(DEBUG, TAG,
     "process: hostUri=%s, resId=%s, resType=%s, "
     "deviceId=%s, timeout=%ds\n",
     hostUri.c_str(), resourceId.c_str(), resourceType.c_str(),
@@ -501,7 +501,7 @@ void IotivityClient::handleFindResources(const picojson::value &value) {
   OCStackResult result = OCPlatform::findResource(hostUri, requestUri,
                          CT_DEFAULT, resourceHandler);
   if (OC_STACK_OK != result) {
-    ERROR_MSG("OCPlatform::findResource was unsuccessful\n");
+    OC_LOG_V(ERROR, TAG, "OCPlatform::findResource was unsuccessful\n");
     m_device->postError(async_call_id);
     return;
   }
@@ -516,7 +516,7 @@ void IotivityClient::handleFindResources(const picojson::value &value) {
 }
 
 void IotivityClient::handleRetrieveResource(const picojson::value &value) {
-  DEBUG_MSG("handleRetrieveResource: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG,"handleRetrieveResource: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
   std::string resId = value.get("id").to_str();
@@ -529,36 +529,36 @@ void IotivityClient::handleRetrieveResource(const picojson::value &value) {
       return;
     }
   } else {
-    DEBUG_MSG("handleRetrieveResource: ERROR_MSG resource not found\n");
+    OC_LOG_V(DEBUG, TAG,"handleRetrieveResource: ERROR_MSG resource not found\n");
     m_device->postError(async_call_id);
   }
 }
 
 void IotivityClient::handleStartObserving(const picojson::value &value) {
-  DEBUG_MSG("handleStartObserving: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG,"handleStartObserving: v=%s\n", value.serialize().c_str());
 
   OCStackResult result;
   double async_call_id = value.get("asyncCallId").get<double>();
   std::string resId = value.get("id").to_str();
-  DEBUG_MSG("\tstartObserving resId = %s\n", resId.c_str());
+  OC_LOG_V(DEBUG, TAG,"\tstartObserving resId = %s\n", resId.c_str());
   IotivityResourceClient *resClient = getResourceById(resId);
 
   if (resClient != NULL) {
     result = resClient->startObserving(async_call_id);
     if (OC_STACK_OK != result) {
-      DEBUG_MSG("\tstartObserving ERROR\n");
+      OC_LOG_V(DEBUG, TAG,"\tstartObserving ERROR\n");
       m_device->postError(async_call_id);
       return;
     }
   } else {
-    DEBUG_MSG("\tresClient NULL ERROR\n");
+    OC_LOG_V(DEBUG, TAG,"\tresClient NULL ERROR\n");
     m_device->postError(async_call_id);
     return;
   }
 }
 
 void IotivityClient::handleUpdateResource(const picojson::value &value) {
-  DEBUG_MSG("handleUpdateResource: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG,"handleUpdateResource: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
   picojson::value param = value.get("OicResource");

@@ -27,6 +27,7 @@ ifeq (, $(IOTIVITY_INC_PATH))
 IOTIVITY_INC_PATH = -I$(IOTIVITY_BUILD_DIR)/resource/csdk/stack/include/ \
         -I$(IOTIVITY_BUILD_DIR)/resource/oc_logger/include \
         -I$(IOTIVITY_BUILD_DIR)/resource/c_common \
+        -I$(IOTIVITY_BUILD_DIR)/resource/csdk/logger/include \
         -I$(IOTIVITY_BUILD_DIR)/resource/include \
         -I/usr/include
 endif

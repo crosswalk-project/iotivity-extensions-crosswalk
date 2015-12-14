@@ -106,7 +106,7 @@ void IotivityInstance::HandleMessage(const char* msg) {
 }
 
 void IotivityInstance::handleSendResponse(const picojson::value& value) {
-  OC_LOG_V(DEBUG, TAG,"handleSendResponse: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG, "handleSendResponse: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
 
@@ -125,7 +125,7 @@ void IotivityInstance::handleSendResponse(const picojson::value& value) {
 }
 
 void IotivityInstance::handleSendError(const picojson::value& value) {
-  OC_LOG_V(DEBUG, TAG,"handleSendError: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG, "handleSendError: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
   std::string errorMsg = value.get("error").to_str();

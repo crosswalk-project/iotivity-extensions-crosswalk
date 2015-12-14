@@ -27,57 +27,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef IOTIVITY_IOTIVITY_TOOLS_H_
-#define IOTIVITY_IOTIVITY_TOOLS_H_
+#ifndef IOTIVITY_IOTIVITY_CONSTANTS_H_
+#define IOTIVITY_IOTIVITY_CONSTANTS_H_
 
-#include <pthread.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/stat.h>
 #include <string>
-#include <map>
-#include <vector>
-#include <functional>
-#include <mutex>               // NOLINT
-#include <condition_variable>  //NOLINT
 
-#include "common/picojson.h"
+const std::string ACKED = "acked";
+const std::string ASYN_CALL_ID = "asyncCallId";
+const std::string CLIENT = "client";
+const std::string CMD = "cmd";
+const std::string CORE_SPEC_VERSION = "coreSpecVersion";
+const std::string DEFAULT = "default";
+const std::string DEVICE_ID = "deviceId";
+const std::string DEVICE_INFO = "info";
+const std::string ERROR_CODE = "eCode";
+const std::string FIRMWARE_VERSION = "firmwareVersion";
+const std::string ID = "id";
+const std::string MANUF_NAME = "manufacturerName";
+const std::string MANUF_URL = "manufacturerUrl";
+const std::string MANUF_DATE = "manufacturerDate";
+const std::string MODEL = "model";
+const std::string NON_ACKED = "non-acked";
+const std::string OIC_RESOURCE = "OicResource";
+const std::string OS_VERSION = "osVersion";
+const std::string PLATFORM_VERSION = "platformVersion";
+const std::string SERVER = "server";
+const std::string SETTINGS = "settings";
+const std::string SUPPORT_URL = "supportUrl";
+const std::string SYSTEM_TIME = "systemTime";
+const std::string UUID = "uuid";
 
-#include "iotivity/iotivity_constants.h"
 
-#include "OCPlatform.h"
-#include "OCApi.h"
 
-using namespace OC;   // NOLINT
-using namespace std;  // NOLINT
 
-#ifdef __cplusplus
-extern "C" {
-#include "logger.h"
-#endif
-
-static const char TAG[] = "IoT-Ext-Xwalk";
-
-#define SUCCESS_RESPONSE 0
-
-extern char *pDebugEnv;
-
-std::string getUserHome();
-bool file_exist(const char *filename);
-void PrintfOcResource(const OCResource &oCResource);
-void PrintfOcRepresentation(const OCRepresentation &oCRepresentation);
-void UpdateOcRepresentation(const OCRepresentation &oCReprSource,
-                            OCRepresentation &oCReprDest,
-                            std::vector<std::string> &updatedPropertyNames);
-void TranslateOCRepresentationToPicojson(
-    const OCRepresentation &oCRepresentation, picojson::object &objectRes);
-void PicojsonPropsToOCRep(
-     OCRepresentation &oCRepresentation, picojson::object &objectRes);
-void CopyInto(std::vector<std::string> &src, picojson::array &dest);
-int GetWait(picojson::value v);
-
-#ifdef __cplusplus
-}  // extern "C"
-#endif
-#endif  // IOTIVITY_IOTIVITY_TOOLS_H_
+#endif  // IOTIVITY_IOTIVITY_CONSTANTS_H_

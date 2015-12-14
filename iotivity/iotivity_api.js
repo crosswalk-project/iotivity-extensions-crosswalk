@@ -616,8 +616,10 @@ extension.setMessageListener(function(json) {
       handleCreateResourceCompleted(msg);
       break;
     case 'retrieveResourceCompleted':
-    case 'startObservingCompleted':
       handleRetrieveResourceCompleted(msg);
+      break;
+    case 'startObservingCompleted':
+      handleStartObservingCompleted(msg);
       break;
     case 'updateResourceCompleted':
       handleUpdateResourceCompleted(msg);
@@ -743,6 +745,23 @@ function handleCreateResourceCompleted(msg) {
 
 function handleRetrieveResourceCompleted(msg) {
   DBG('handleRetrieveResourceCompleted msg=' + JSON.stringify(msg));
+
+  if (msg.asyncCallId in g_async_calls) {
+    if (msg.eCode == 0) {
+      DBG('g_async_calls[].resolve');
+      var oicResource = new OicResource(msg.OicResourceInit);
+      _addConstProperty(oicResource, 'id', msg.id);
+      g_async_calls[msg.asyncCallId].resolve(oicResource);
+    } else {
+      g_async_calls[msg.asyncCallId].reject(Error('Command error'));
+    }
+
+    delete g_async_calls[msg.asyncCallId];
+  }
+}
+
+function handleStartObservingCompleted(msg) {
+  DBG('handleStartObservingCompleted msg=' + JSON.stringify(msg));
 
   if (msg.asyncCallId in g_async_calls) {
     if (msg.eCode == 0) {

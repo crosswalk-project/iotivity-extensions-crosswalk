@@ -48,7 +48,7 @@ FILE* xwalk_client_fopen(const char *path, const char *mode) {
   std::string CRED_FILE = getUserHome() + "/" + JSON_FILE;
   const char* credFile = CRED_FILE.c_str();
 
-  OC_LOG_V(DEBUG, TAG,"#OPEN JSON DB XWALK IOT %s\n", credFile);
+  OC_LOG_V(DEBUG, TAG, "#OPEN JSON DB XWALK IOT %s\n", credFile);
 
   return fopen(credFile, mode);
 }
@@ -61,7 +61,8 @@ IotivityDeviceInfo::~IotivityDeviceInfo() {}
 std::string IotivityDeviceInfo::hasMap(std::string key) {
   std::map<std::string, std::string>::const_iterator it;
   if ((it = m_deviceinfomap.find(key)) != m_deviceinfomap.end()) {
-    OC_LOG_V(DEBUG, TAG,"Found %s=%s\n", key.c_str(), m_deviceinfomap[key].c_str());
+    OC_LOG_V(DEBUG, TAG, "Found %s=%s\n", key.c_str(),
+      m_deviceinfomap[key].c_str());
     return m_deviceinfomap[key];
   }
   return "";
@@ -70,10 +71,10 @@ std::string IotivityDeviceInfo::hasMap(std::string key) {
 int IotivityDeviceInfo::mapSize() { return m_deviceinfomap.size(); }
 
 void IotivityDeviceInfo::deserialize(const picojson::value& value) {
-  OC_LOG_V(DEBUG, TAG,"IotivityDeviceInfo::deserialize\n");
+  OC_LOG_V(DEBUG, TAG, "IotivityDeviceInfo::deserialize\n");
   picojson::value properties = value.get("info");
   picojson::object& propertiesobject = properties.get<picojson::object>();
-  OC_LOG_V(DEBUG, TAG,"value: size=%d\n", (int)propertiesobject.size());
+  OC_LOG_V(DEBUG, TAG, "value: size=%d\n", (int)propertiesobject.size());
 
   m_deviceinfomap.clear();
   for (picojson::value::object::iterator iter = propertiesobject.begin();
@@ -82,7 +83,7 @@ void IotivityDeviceInfo::deserialize(const picojson::value& value) {
     picojson::value objectValue = iter->second;
 
     if (objectValue.is<string>()) {
-      OC_LOG_V(DEBUG, TAG,"[string] key=%s, value=%s\n", objectKey.c_str(),
+      OC_LOG_V(DEBUG, TAG, "[string] key=%s, value=%s\n", objectKey.c_str(),
                 objectValue.get<string>().c_str());
       m_deviceinfomap[objectKey] = objectValue.get<string>();
     }
@@ -105,7 +106,7 @@ IotivityDeviceSettings::IotivityDeviceSettings() {
 IotivityDeviceSettings::~IotivityDeviceSettings() {}
 
 void IotivityDeviceSettings::deserialize(const picojson::value& value) {
-  OC_LOG_V(DEBUG, TAG,"IotivityDeviceSettings::deserialize\n");
+  OC_LOG_V(DEBUG, TAG, "IotivityDeviceSettings::deserialize\n");
   if (value.contains("url")) {
     m_url = value.get("url").to_str();
   }
@@ -220,16 +221,16 @@ void IotivityDevice::configure(IotivityDeviceSettings* settings) {
       if (pos != std::string::npos) {
         host = tmp.substr(0, pos);
         std::string portString = tmp.substr(pos + 1, tmp.length());
-        OC_LOG_V(DEBUG, TAG,"host=%s, portString=%s\n", host.c_str(), portString.c_str());
+        OC_LOG_V(DEBUG, TAG, "host=%s, portString=%s\n", host.c_str(),
+          portString.c_str());
       }
     }
   }
 
 #if SECURE
-  if (!file_exist(JSON_PATH.c_str()))
-  {
+  if (!file_exist(JSON_PATH.c_str())) {
       std::cerr << "ERROR:: Missing JSON:" << JSON_PATH << std::endl;
-      //exit(-1);
+      // exit(-1);
   }
 
   static OCPersistentStorage ps = {
@@ -270,8 +271,9 @@ void IotivityDevice::configure(IotivityDeviceSettings* settings) {
   */
   OCPlatform::Configure(cfg);
 
-  OC_LOG_V(DEBUG, TAG,"OCPlatform::Configure: host=%s:%d\n", host.c_str(), port);
-  OC_LOG_V(DEBUG, TAG,"modeType=%d, QoS=%d\n", modeType, QoS);
+  OC_LOG_V(DEBUG, TAG, "OCPlatform::Configure: host=%s:%d\n",
+    host.c_str(), port);
+  OC_LOG_V(DEBUG, TAG, "modeType=%d, QoS=%d\n", modeType, QoS);
 }
 
 OCStackResult IotivityDevice::configurePlatformInfo(
@@ -279,7 +281,7 @@ OCStackResult IotivityDevice::configurePlatformInfo(
   OCStackResult result = OC_STACK_ERROR;
   OCPlatformInfo platformInfo = {0};
 
-  OC_LOG_V(DEBUG, TAG,"configurePlatformInfo %d\n", deviceInfo.mapSize());
+  OC_LOG_V(DEBUG, TAG, "configurePlatformInfo %d\n", deviceInfo.mapSize());
 
   if (deviceInfo.mapSize() == 0) {
     // nothing to do
@@ -356,7 +358,7 @@ OCStackResult IotivityDevice::configureDeviceInfo(
   OCStackResult result = OC_STACK_ERROR;
   OCDeviceInfo oCDeviceInfo = {0};
 
-  OC_LOG_V(DEBUG, TAG,"configureDeviceInfo\n");
+  OC_LOG_V(DEBUG, TAG, "configureDeviceInfo\n");
 
   if (deviceInfo.mapSize() == 0) {
     // nothing to do
@@ -376,7 +378,7 @@ OCStackResult IotivityDevice::configureDeviceInfo(
 }
 
 void IotivityDevice::handleConfigure(const picojson::value& value) {
-  OC_LOG_V(DEBUG, TAG,"handleConfigure: v=%s\n", value.serialize().c_str());
+  OC_LOG_V(DEBUG, TAG, "handleConfigure: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
 
@@ -409,7 +411,7 @@ void IotivityDevice::handleConfigure(const picojson::value& value) {
 }
 
 static void systemReboot() {
-  OC_LOG_V(DEBUG, TAG,"systemReboot\n");
+  OC_LOG_V(DEBUG, TAG, "systemReboot\n");
   // TODO(aphao) Not sure userspace has enough privilege to reboot.
 }
 
@@ -426,13 +428,13 @@ void IotivityDevice::handleReboot(const picojson::value& value) {
 }
 
 void IotivityDevice::PostMessage(const char* msg) {
-  OC_LOG_V(DEBUG, TAG,"[Native==>JS] PostMessage: v=%s\n", msg);
+  OC_LOG_V(DEBUG, TAG, "[Native==>JS] PostMessage: v=%s\n", msg);
   m_instance->PostMessage(msg);
 }
 
 void IotivityDevice::postResult(const char* completed_operation,
                                 double async_operation_id) {
-  OC_LOG_V(DEBUG, TAG,"postResult: c=%s, id=%f\n", completed_operation,
+  OC_LOG_V(DEBUG, TAG, "postResult: c=%s, id=%f\n", completed_operation,
             async_operation_id);
 
   picojson::value::object object;
@@ -444,7 +446,7 @@ void IotivityDevice::postResult(const char* completed_operation,
 }
 
 void IotivityDevice::postError(double async_operation_id) {
-  OC_LOG_V(DEBUG, TAG,"postError: id=%f\n", async_operation_id);
+  OC_LOG_V(ERROR, TAG, "postError: id=%f\n", async_operation_id);
 
   picojson::value::object object;
   object["cmd"] = picojson::value("asyncCallError");
@@ -453,3 +455,6 @@ void IotivityDevice::postError(double async_operation_id) {
   picojson::value value(object);
   PostMessage(value.serialize().c_str());
 }
+
+
+

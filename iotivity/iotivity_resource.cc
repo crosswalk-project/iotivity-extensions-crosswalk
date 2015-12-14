@@ -46,7 +46,7 @@ IotivityResourceInit::IotivityResourceInit(const picojson::value& value) {
 IotivityResourceInit::~IotivityResourceInit() {}
 
 void IotivityResourceInit::deserialize(const picojson::value& value) {
-  OC_LOG_V(DEBUG, TAG,">>IotivityResourceInit::deserialize\n");
+  OC_LOG_V(DEBUG, TAG, ">>IotivityResourceInit::deserialize\n");
 
   m_url = value.get("url").to_str();
   m_deviceId = value.get("deviceId").to_str();
@@ -63,7 +63,8 @@ void IotivityResourceInit::deserialize(const picojson::value& value) {
 
   for (picojson::array::iterator iter = resourceTypes.begin();
        iter != resourceTypes.end(); ++iter) {
-    OC_LOG_V(DEBUG, TAG,"array resourceTypes value=%s\n", (*iter).get<string>().c_str());
+    OC_LOG_V(DEBUG, TAG, "array resourceTypes value=%s\n",
+      (*iter).get<string>().c_str());
     if (m_resourceTypeName == "") {
       m_resourceTypeName = (*iter).get<string>();
     }
@@ -75,7 +76,8 @@ void IotivityResourceInit::deserialize(const picojson::value& value) {
 
   for (picojson::array::iterator iter = interfaces.begin();
        iter != interfaces.end(); ++iter) {
-    OC_LOG_V(DEBUG, TAG,"array interfaces value=%s\n", (*iter).get<string>().c_str());
+    OC_LOG_V(DEBUG, TAG, "array interfaces value=%s\n",
+      (*iter).get<string>().c_str());
     if (m_resourceInterface == "") {
       m_resourceInterface = (*iter).get<string>();
     }
@@ -90,19 +92,19 @@ void IotivityResourceInit::deserialize(const picojson::value& value) {
 
   if (m_isSecure) { m_resourceProperty |= OC_SECURE; }
 
-  OC_LOG_V(DEBUG, TAG,"discoverable=%d, observable=%d, isSecure=%d\n", m_discoverable,
-            m_observable, m_isSecure);
-  OC_LOG_V(DEBUG, TAG,"SVR: uri=%s, type=%s, itf=%s, prop=%d\n", m_url.c_str(),
-            m_resourceTypeName.c_str(), m_resourceInterface.c_str(),
+  OC_LOG_V(DEBUG, TAG, "discoverable=%d, observable=%d, isSecure=%d\n",
+    m_discoverable, m_observable, m_isSecure);
+  OC_LOG_V(DEBUG, TAG, "SVR: uri=%s, type=%s, itf=%s, prop=%d\n",
+    m_url.c_str(), m_resourceTypeName.c_str(), m_resourceInterface.c_str(),
             m_resourceProperty);
 
   picojson::value properties = value.get("properties");
   picojson::object& propertiesobject = properties.get<picojson::object>();
-  OC_LOG_V(DEBUG, TAG,"properties: size=%d\n", propertiesobject.size());
+  OC_LOG_V(DEBUG, TAG, "properties: size=%d\n", propertiesobject.size());
 
   m_resourceRep.setUri(m_url);
   PicojsonPropsToOCRep(m_resourceRep, propertiesobject);
-  OC_LOG_V(DEBUG, TAG,"<<IotivityResourceInit::deserialize\n");
+  OC_LOG_V(DEBUG, TAG, "<<IotivityResourceInit::deserialize\n");
 }
 
 void IotivityResourceInit::serialize(picojson::object& object) {
@@ -155,7 +157,7 @@ ObservationIds& IotivityResourceServer::getObserversList() {
 
 OCEntityHandlerResult IotivityResourceServer::entityHandlerCallback(
   std::shared_ptr<OCResourceRequest> request) {
-  OC_LOG_V(DEBUG, TAG,"\n\n[Remote Client==>] entityHandlerCallback:\n");
+  OC_LOG_V(DEBUG, TAG, "\n\n[Remote Client==>] entityHandlerCallback:\n");
 
   OCEntityHandlerResult ehResult = OC_EH_ERROR;
   picojson::value::object object;
@@ -168,16 +170,16 @@ OCEntityHandlerResult IotivityResourceServer::entityHandlerCallback(
     int requestFlag = request->getRequestHandlerFlag();
 
     if (requestFlag & RequestHandlerFlag::ObserverFlag) {
-      OC_LOG_V(DEBUG, TAG,"postEntityHandler:ObserverFlag\n");
+      OC_LOG_V(DEBUG, TAG, "postEntityHandler:ObserverFlag\n");
 
       iotivityRequestEvent.m_type = "observe";
       ObservationInfo observationInfo = request->getObservationInfo();
 
       if (ObserveAction::ObserveRegister == observationInfo.action) {
-        OC_LOG_V(DEBUG, TAG,"postEntityHandler:ObserveRegister\n");
+        OC_LOG_V(DEBUG, TAG, "postEntityHandler:ObserveRegister\n");
         m_interestedObservers.push_back(observationInfo.obsId);
       } else if (ObserveAction::ObserveUnregister == observationInfo.action) {
-        OC_LOG_V(DEBUG, TAG,"postEntityHandler:ObserveUnregister\n");
+        OC_LOG_V(DEBUG, TAG, "postEntityHandler:ObserveUnregister\n");
         m_interestedObservers.erase(
           std::remove(m_interestedObservers.begin(),
                       m_interestedObservers.end(), observationInfo.obsId),
@@ -238,13 +240,13 @@ OCStackResult IotivityResourceServer::registerResource() {
     std::string resourceTypeName =
       m_oicResourceInit->m_resourceTypeNameArray[i];
 
-    OC_LOG_V(DEBUG, TAG,"bindTypeToResource=%s\n", resourceTypeName.c_str());
+    OC_LOG_V(DEBUG, TAG, "bindTypeToResource=%s\n", resourceTypeName.c_str());
 
     result =
       OCPlatform::bindTypeToResource(m_resourceHandle, resourceTypeName);
 
     if (OC_STACK_OK != result) {
-      OC_LOG_V(ERROR, TAG, 
+      OC_LOG_V(ERROR, TAG,
         "bindTypeToResource TypeName to Resource unsuccessful\n");
       return result;
     }
@@ -255,7 +257,8 @@ OCStackResult IotivityResourceServer::registerResource() {
     std::string resourceInterface =
       m_oicResourceInit->m_resourceInterfaceArray[i];
 
-    OC_LOG_V(DEBUG, TAG,"bindInterfaceToResource=%s\n", resourceInterface.c_str());
+    OC_LOG_V(DEBUG, TAG, "bindInterfaceToResource=%s\n",
+      resourceInterface.c_str());
 
     result = OCPlatform::bindInterfaceToResource(m_resourceHandle,
              resourceInterface);
@@ -336,7 +339,7 @@ void IotivityResourceClient::serialize(picojson::object& object) {
 void IotivityResourceClient::onPut(const HeaderOptions& headerOptions,
                                    const OCRepresentation& rep, const int eCode,
                                    double asyncCallId) {
-  OC_LOG_V(DEBUG, TAG,"onPut: eCode=%d, asyncCallId=%f\n", eCode, asyncCallId);
+  OC_LOG_V(DEBUG, TAG, "onPut: eCode=%d, asyncCallId=%f\n", eCode, asyncCallId);
 
   picojson::value::object object;
   object["cmd"] = picojson::value("updateResourceCompleted");
@@ -356,9 +359,10 @@ void IotivityResourceClient::onPut(const HeaderOptions& headerOptions,
 }
 
 void IotivityResourceClient::onGet(const HeaderOptions& headerOptions,
-                                   const OCRepresentation& rep, const int eCode,
+                                   const OCRepresentation& rep,
+                                   const int eCode,
                                    double asyncCallId) {
-  OC_LOG_V(DEBUG, TAG,"onGet: eCode=%d, %f\n", eCode, asyncCallId);
+  OC_LOG_V(DEBUG, TAG, "onGet: eCode=%d, %f\n", eCode, asyncCallId);
 
   picojson::value::object object;
   object["cmd"] = picojson::value("retrieveResourceCompleted");
@@ -381,7 +385,7 @@ void IotivityResourceClient::onGet(const HeaderOptions& headerOptions,
 void IotivityResourceClient::onPost(const HeaderOptions& headerOptions,
                                     const OCRepresentation& rep,
                                     const int eCode, double asyncCallId) {
-  OC_LOG_V(DEBUG, TAG,"onPost: eCode=%d, %f\n", eCode, asyncCallId);
+  OC_LOG_V(DEBUG, TAG, "onPost: eCode=%d, %f\n", eCode, asyncCallId);
 
   picojson::value::object object;
   object["cmd"] = picojson::value("createResourceCompleted");
@@ -401,7 +405,7 @@ void IotivityResourceClient::onPost(const HeaderOptions& headerOptions,
 }
 
 void IotivityResourceClient::onStartObserving(double asyncCallId) {
-  OC_LOG_V(DEBUG, TAG,"onStartObserving: %f\n", asyncCallId);
+  OC_LOG_V(DEBUG, TAG, "onStartObserving: %f\n", asyncCallId);
 
   picojson::value::object object;
   object["cmd"] = picojson::value("startObservingCompleted");
@@ -425,15 +429,22 @@ void IotivityResourceClient::onObserve(const HeaderOptions headerOptions,
   picojson::value::object object;
   object["cmd"] = picojson::value("onObserve");
   object["eCode"] = picojson::value(static_cast<double>(eCode));
-  serialize(object);
-  object["type"] = picojson::value("update");
+  object["asyncCallId"] = picojson::value(static_cast<double>(asyncCallId));
+
+  if (sequenceNumber == OC_OBSERVE_REGISTER) {
+    object["type"] = picojson::value("register");
+  } else if (sequenceNumber == OC_OBSERVE_DEREGISTER) {
+    object["type"] = picojson::value("deregister");
+  } else {
+    object["type"] = picojson::value("update");
+  }
 
   if (eCode == OC_STACK_OK) {
     PrintfOcRepresentation(rep);
     m_oicResourceInit->m_resourceRep = rep;
-    serialize(object);
 
     std::vector<std::string> updatedPropertyNames;
+
     for (auto& cur : rep) {
       std::string attrname = cur.attrname();
       updatedPropertyNames.push_back(attrname);
@@ -442,6 +453,7 @@ void IotivityResourceClient::onObserve(const HeaderOptions headerOptions,
     picojson::array updatedPropertyNamesArray;
     CopyInto(updatedPropertyNames, updatedPropertyNamesArray);
     object["updatedPropertyNames"] = picojson::value(updatedPropertyNamesArray);
+    serialize(object);
   } else {
     OC_LOG_V(ERROR, TAG, "\n\n[Remote Server==>] onObserve: error\n");
   }
@@ -452,7 +464,7 @@ void IotivityResourceClient::onObserve(const HeaderOptions headerOptions,
 
 void IotivityResourceClient::onDelete(const HeaderOptions& headerOptions,
                                       const int eCode, double asyncCallId) {
-  OC_LOG_V(DEBUG, TAG,"onDelete: eCode=%d, %f\n", eCode, asyncCallId);
+  OC_LOG_V(DEBUG, TAG, "onDelete: eCode=%d, %f\n", eCode, asyncCallId);
 
   picojson::value::object object;
   object["cmd"] = picojson::value("deleteResourceCompleted");
@@ -469,7 +481,7 @@ void IotivityResourceClient::onDelete(const HeaderOptions& headerOptions,
 
 OCStackResult IotivityResourceClient::createResource(
   IotivityResourceInit& oicResourceInit, double asyncCallId) {
-  OC_LOG_V(DEBUG, TAG,"createResource %f\n", asyncCallId);
+  OC_LOG_V(DEBUG, TAG, "createResource %f\n", asyncCallId);
 
   OCStackResult result = OC_STACK_ERROR;
 
@@ -489,7 +501,7 @@ OCStackResult IotivityResourceClient::createResource(
 }
 
 OCStackResult IotivityResourceClient::retrieveResource(double asyncCallId) {
-  OC_LOG_V(DEBUG, TAG,"retrieveResource %f\n", asyncCallId);
+  OC_LOG_V(DEBUG, TAG, "retrieveResource %f\n", asyncCallId);
 
   OCStackResult result = OC_STACK_ERROR;
 
@@ -515,7 +527,7 @@ OCStackResult IotivityResourceClient::updateResource(
 
 OCStackResult IotivityResourceClient::updateResource(
   OCRepresentation& representation, double asyncCallId, bool doPost) {
-  OC_LOG_V(DEBUG, TAG,"updateResource %f\n", asyncCallId);
+  OC_LOG_V(DEBUG, TAG, "updateResource %f\n", asyncCallId);
 
   OCStackResult result = OC_STACK_ERROR;
 
@@ -549,7 +561,7 @@ OCStackResult IotivityResourceClient::updateResource(
 }
 
 OCStackResult IotivityResourceClient::deleteResource(double asyncCallId) {
-  OC_LOG_V(DEBUG, TAG,"deleteResource %f\n", asyncCallId);
+  OC_LOG_V(DEBUG, TAG, "deleteResource %f\n", asyncCallId);
 
   OCStackResult result = OC_STACK_ERROR;
 
@@ -569,7 +581,7 @@ OCStackResult IotivityResourceClient::deleteResource(double asyncCallId) {
 }
 
 OCStackResult IotivityResourceClient::startObserving(double asyncCallId) {
-  OC_LOG_V(DEBUG, TAG,"startObserving %f\n", asyncCallId);
+  OC_LOG_V(DEBUG, TAG, "startObserving %f\n", asyncCallId);
 
   OCStackResult result = OC_STACK_ERROR;
 
@@ -593,7 +605,7 @@ OCStackResult IotivityResourceClient::startObserving(double asyncCallId) {
 }
 
 OCStackResult IotivityResourceClient::cancelObserving(double asyncCallId) {
-  OC_LOG_V(DEBUG, TAG,"cancelObserving %f\n", asyncCallId);
+  OC_LOG_V(DEBUG, TAG, "cancelObserving %f\n", asyncCallId);
   OCStackResult result = OC_STACK_ERROR;
 
   if (m_ocResourcePtr == NULL) { return result; }
@@ -617,9 +629,9 @@ void IotivityRequestEvent::deserialize(
   int requestFlag = request->getRequestHandlerFlag();
   int requestHandle = (int)request->getRequestHandle();  // NOLINT
 
-  OC_LOG_V(DEBUG, TAG,"Deserialize: requestType=%s\n", requestType.c_str());
-  OC_LOG_V(DEBUG, TAG,"Deserialize: requestFlag=0x%x\n", requestFlag);
-  OC_LOG_V(DEBUG, TAG,"Deserialize: requestHandle=0x%x\n", requestHandle);
+  OC_LOG_V(DEBUG, TAG, "Deserialize: requestType=%s\n", requestType.c_str());
+  OC_LOG_V(DEBUG, TAG, "Deserialize: requestFlag=0x%x\n", requestFlag);
+  OC_LOG_V(DEBUG, TAG, "Deserialize: requestHandle=0x%x\n", requestHandle);
 
   if (requestFlag & RequestHandlerFlag::RequestFlag) {
     if (requestType == "GET") {
@@ -647,7 +659,7 @@ void IotivityRequestEvent::deserialize(
 
   if (!m_queries.empty()) {
     for (auto it : m_queries) {
-      OC_LOG_V(DEBUG, TAG,"Queries: key=%s, value=%s\n", it.first.c_str(),
+      OC_LOG_V(DEBUG, TAG, "Queries: key=%s, value=%s\n", it.first.c_str(),
                 it.second.c_str());
     }
   }
@@ -656,8 +668,8 @@ void IotivityRequestEvent::deserialize(
 
   if (!m_headerOptions.empty()) {
     for (auto it = m_headerOptions.begin(); it != m_headerOptions.end(); ++it) {
-      OC_LOG_V(DEBUG, TAG,"HeaderOptions: ID=%d, value=%s\n", it->getOptionID(),
-                it->getOptionData().c_str());
+      OC_LOG_V(DEBUG, TAG, "HeaderOptions: ID=%d, value=%s\n",
+        it->getOptionID(), it->getOptionData().c_str());
     }
   }
 
@@ -674,8 +686,8 @@ void IotivityRequestEvent::deserialize(const picojson::value& value) {
   picojson::value properties = value.get("properties");
   picojson::object& propertiesobject = properties.get<picojson::object>();
 
-  OC_LOG_V(DEBUG, TAG,"IotivityRequestEvent::deserialize from JSON\n");
-  OC_LOG_V(DEBUG, TAG,"properties: size=%d\n", propertiesobject.size());
+  OC_LOG_V(DEBUG, TAG, "IotivityRequestEvent::deserialize from JSON\n");
+  OC_LOG_V(DEBUG, TAG, "properties: size=%d\n", propertiesobject.size());
 
   m_resourceRep.setUri(properties.get("uri").to_str());
 
@@ -688,7 +700,7 @@ void IotivityRequestEvent::serialize(picojson::object& object) {
   object["source"] = picojson::value(m_source);
   object["target"] = picojson::value(m_target);
 
-  OC_LOG_V(DEBUG, TAG,"IotivityRequestEvent::serialize to JSON\n");
+  OC_LOG_V(DEBUG, TAG, "IotivityRequestEvent::serialize to JSON\n");
 
   if ((m_type == "create") || (m_type == "update")) {
     picojson::object properties;
@@ -717,7 +729,7 @@ void IotivityRequestEvent::serialize(picojson::object& object) {
   if (!m_queries.empty()) {
     for (auto it : m_queries) {
       picojson::object object;
-      OC_LOG_V(DEBUG, TAG,"Queries: key=%s, value=%s\n", it.first.c_str(),
+      OC_LOG_V(DEBUG, TAG, "Queries: key=%s, value=%s\n", it.first.c_str(),
                 it.second.c_str());
       object[it.first.c_str()] = picojson::value(it.second);
       queryOptionsArray.push_back(picojson::value(object));
@@ -731,8 +743,8 @@ void IotivityRequestEvent::serialize(picojson::object& object) {
 
     for (auto it = m_headerOptions.begin(); it != m_headerOptions.end(); ++it) {
       picojson::object object;
-      OC_LOG_V(DEBUG, TAG,"HeaderOptions: ID=%d, value=%s\n", it->getOptionID(),
-                it->getOptionData().c_str());
+      OC_LOG_V(DEBUG, TAG, "HeaderOptions: ID=%d, value=%s\n",
+        it->getOptionID(), it->getOptionData().c_str());
       object[std::to_string(it->getOptionID()).c_str()] =
         picojson::value(it->getOptionData());
       headerOptionsArray.push_back(picojson::value(object));
@@ -741,7 +753,8 @@ void IotivityRequestEvent::serialize(picojson::object& object) {
 }
 
 OCStackResult IotivityRequestEvent::sendResponse() {
-  OC_LOG_V(DEBUG, TAG,"IotivityRequestEvent::sendResponse: type=%s\n", m_type.c_str());
+  OC_LOG_V(DEBUG, TAG, "IotivityRequestEvent::sendResponse: type=%s\n",
+    m_type.c_str());
 
   OCStackResult result = OC_STACK_ERROR;
   auto pResponse = std::make_shared<OC::OCResourceResponse>();

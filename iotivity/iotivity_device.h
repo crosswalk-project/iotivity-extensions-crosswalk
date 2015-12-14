@@ -96,7 +96,7 @@ class IotivityDevice {
   void handleReboot(const picojson::value& value);
   void PostMessage(const char* msg);
   void postResult(const char* completed_operation, double async_operation_id);
-  void postError(double async_operation_id);
+  void postError(const char* msg, double async_operation_id);
 };
 
 #endif  // IOTIVITY_IOTIVITY_DEVICE_H_

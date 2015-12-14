@@ -59,7 +59,7 @@ void IotivityServer::handleRegisterResource(const picojson::value& value) {
   OCStackResult result = resServer->registerResource();
 
   if (OC_STACK_OK != result) {
-    m_device->postError(async_call_id);
+    m_device->postError("registerResource failed", async_call_id);
     return;
   }
 
@@ -84,8 +84,8 @@ void IotivityServer::handleUnregisterResource(const picojson::value& value) {
   IotivityResourceServer* resServer = getResourceById(resId);
 
   if (resServer == NULL) {
-    OC_LOG_V(ERROR, TAG, "handleUnregisterResource, resource not found\n");
-    m_device->postError(async_call_id);
+    m_device->postError("handleUnregisterResource, resource not found",
+      async_call_id);
     return;
   }
 
@@ -94,8 +94,7 @@ void IotivityServer::handleUnregisterResource(const picojson::value& value) {
   OCStackResult result = OCPlatform::unregisterResource(resHandle);
 
   if (OC_STACK_OK != result) {
-    OC_LOG_V(ERROR, TAG, "OCPlatform::unregisterResource was unsuccessful\n");
-    m_device->postError(async_call_id);
+    m_device->postError("unregisterResource failed", async_call_id);
     return;
   }
 
@@ -114,8 +113,7 @@ void IotivityServer::handleEnablePresence(const picojson::value& value) {
   OCStackResult result = OCPlatform::startPresence(ttl);
 
   if (OC_STACK_OK != result) {
-    OC_LOG_V(ERROR, TAG, "OCPlatform::startPresence was unsuccessful\n");
-    m_device->postError(async_call_id);
+    m_device->postError("startPresence failed", async_call_id);
     return;
   }
 
@@ -130,8 +128,7 @@ void IotivityServer::handleDisablePresence(const picojson::value& value) {
   OCStackResult result = OCPlatform::stopPresence();
 
   if (OC_STACK_OK != result) {
-    OC_LOG_V(ERROR, TAG, "OCPlatform::stopPresence was unsuccessful\n");
-    m_device->postError(async_call_id);
+    m_device->postError("stopPresence failed", async_call_id);
     return;
   }
 
@@ -149,8 +146,8 @@ void IotivityServer::handleNotify(const picojson::value& value) {
   IotivityResourceServer* resServer = getResourceById(resId);
 
   if (resServer == NULL) {
-    OC_LOG_V(ERROR, TAG, "handleNotify, resource not found was unsuccessful\n");
-    m_device->postError(async_call_id);
+    m_device->postError("handleNotify, resource not found",
+      async_call_id);
     return;
   }
 
@@ -167,8 +164,7 @@ void IotivityServer::handleNotify(const picojson::value& value) {
     OCStackResult result =
         OCPlatform::notifyListOfObservers(resHandle, observationIds, pResponse);
     if (OC_STACK_OK != result) {
-      OC_LOG_V(ERROR, TAG, "OCPlatform::notifyAllObservers was unsuccessful\n");
-      m_device->postError(async_call_id);
+      m_device->postError("handleNotify failed", async_call_id);
       return;
     }
   }

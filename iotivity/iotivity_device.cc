@@ -394,16 +394,14 @@ void IotivityDevice::handleConfigure(const picojson::value& value) {
   OCStackResult result = configurePlatformInfo(deviceSettings.m_deviceInfo);
 
   if (result != OC_STACK_OK) {
-    OC_LOG_V(ERROR, TAG, "Platform Info Registration was unsuccessful\n");
-    postError(async_call_id);
+    postError("Platform Info Registration failed", async_call_id);
     return;
   }
 
   result = configureDeviceInfo(deviceSettings.m_deviceInfo);
 
   if (result != OC_STACK_OK) {
-    OC_LOG_V(ERROR, TAG, "Device Info Registration was unsuccessful\n");
-    postError(async_call_id);
+    postError("Device Info Registration failed", async_call_id);
     return;
   }
 
@@ -445,8 +443,8 @@ void IotivityDevice::postResult(const char* completed_operation,
   PostMessage(value.serialize().c_str());
 }
 
-void IotivityDevice::postError(double async_operation_id) {
-  OC_LOG_V(ERROR, TAG, "postError: id=%f\n", async_operation_id);
+void IotivityDevice::postError(const char* msg, double async_operation_id) {
+  OC_LOG_V(ERROR, TAG, "%s postError: id=%f\n", msg, async_operation_id);
 
   picojson::value::object object;
   object["cmd"] = picojson::value("asyncCallError");

@@ -117,7 +117,7 @@ void IotivityInstance::handleSendResponse(const picojson::value& value) {
   OCStackResult result = iotivityRequestEvent.sendResponse();
 
   if (OC_STACK_OK != result) {
-    m_device->postError(async_call_id);
+    m_device->postError("sendResponse failed", async_call_id);
     return;
   }
 
@@ -135,7 +135,7 @@ void IotivityInstance::handleSendError(const picojson::value& value) {
   OCStackResult result = iotivityRequestEvent.sendError();
 
   if (OC_STACK_OK != result) {
-    m_device->postError(async_call_id);
+    m_device->postError("sendError failed", async_call_id);
     return;
   }
 

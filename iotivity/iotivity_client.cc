@@ -202,9 +202,8 @@ void IotivityClient::foundDeviceCallback(const OCRepresentation &rep,
                            CT_ADAPTER_IP, platformInfoHandler);
 
     if (OC_STACK_OK != result) {
-      OC_LOG_V(ERROR, TAG, "OCPlatform::getPlatformInfo was unsuccessful\n");
       double async_call_id = value.get("asyncCallId").get<double>();
-      m_device->postError(async_call_id);
+      m_device->postError("OCPlatform::getPlatformInfo", async_call_id);
       return;
     }
 #endif
@@ -317,11 +316,11 @@ void IotivityClient::handleCancelObserving(const picojson::value &value) {
   if (resClient != NULL) {
     OCStackResult result = resClient->cancelObserving(async_call_id);
     if (OC_STACK_OK != result) {
-      m_device->postError(async_call_id);
+      m_device->postError("handleCancelObserving failed", async_call_id);
       return;
     }
   } else {
-    m_device->postError(async_call_id);
+    m_device->postError("resource not found", async_call_id);
     return;
   }
   m_device->postResult("cancelObservingCompleted", async_call_id);
@@ -341,11 +340,11 @@ void IotivityClient::handleCreateResource(const picojson::value &value) {
     OCStackResult result =
       resClient->createResource(oicResourceInit, async_call_id);
     if (OC_STACK_OK != result) {
-      m_device->postError(async_call_id);
+      m_device->postError("createResource failed", async_call_id);
       return;
     }
   } else {
-    m_device->postError(async_call_id);
+    m_device->postError("resource not found", async_call_id);
   }
 }
 
@@ -360,11 +359,11 @@ void IotivityClient::handleDeleteResource(const picojson::value &value) {
   if (resClient != NULL) {
     OCStackResult result = resClient->deleteResource(async_call_id);
     if (OC_STACK_OK != result) {
-      m_device->postError(async_call_id);
+      m_device->postError("deleteResource failed", async_call_id);
       return;
     }
   } else {
-    m_device->postError(async_call_id);
+    m_device->postError("resource not found", async_call_id);
   }
 }
 
@@ -415,8 +414,7 @@ void IotivityClient::handleFindDevices(const picojson::value &value) {
                          deviceDiscoveryRequest,
                          CT_ADAPTER_IP, deviceInfoHandler);
   if (OC_STACK_OK != result) {
-    OC_LOG_V(ERROR, TAG, "OCPlatform::getDeviceInfo was unsuccessful\n");
-    m_device->postError(async_call_id);
+    m_device->postError("getDeviceInfo failed", async_call_id);
     return;
   }
 
@@ -481,8 +479,7 @@ void IotivityClient::handleFindResources(const picojson::value &value) {
     if (resourceId != "") {
       IotivityResourceClient *resClient = getResourceById(resourceId);
       if (resClient == NULL) {
-        OC_LOG_V(ERROR, TAG, "findResource by resourceId was error\n");
-        m_device->postError(async_call_id);
+        m_device->postError("findResource failed", async_call_id);
         return;
       } else {
         m_foundresourcemap[resourceId] = resClient;
@@ -506,8 +503,7 @@ void IotivityClient::handleFindResources(const picojson::value &value) {
   OCStackResult result = OCPlatform::findResource(hostUri, requestUri,
                          CT_DEFAULT, resourceHandler);
   if (OC_STACK_OK != result) {
-    OC_LOG_V(ERROR, TAG, "OCPlatform::findResource was unsuccessful\n");
-    m_device->postError(async_call_id);
+    m_device->postError("findResource failed", async_call_id);
     return;
   }
 
@@ -531,12 +527,11 @@ void IotivityClient::handleRetrieveResource(const picojson::value &value) {
   if (resClient != NULL) {
     OCStackResult result = resClient->retrieveResource(async_call_id);
     if (OC_STACK_OK != result) {
-      m_device->postError(async_call_id);
+      m_device->postError("retrieveResource failed", async_call_id);
       return;
     }
   } else {
-    OC_LOG_V(ERROR, TAG, "handleRetrieveResource: resource not found\n");
-    m_device->postError(async_call_id);
+      m_device->postError("resource not found", async_call_id);
   }
 }
 
@@ -553,13 +548,11 @@ void IotivityClient::handleStartObserving(const picojson::value &value) {
   if (resClient != NULL) {
     result = resClient->startObserving(async_call_id);
     if (OC_STACK_OK != result) {
-      OC_LOG_V(DEBUG, TAG, "\tstartObserving ERROR\n");
-      m_device->postError(async_call_id);
+      m_device->postError("tstartObserving failed", async_call_id);
       return;
     }
   } else {
-    OC_LOG_V(ERROR, TAG, "\tresClient NULL ERROR\n");
-    m_device->postError(async_call_id);
+    m_device->postError("resource not found", async_call_id);
     return;
   }
 }
@@ -585,10 +578,10 @@ void IotivityClient::handleUpdateResource(const picojson::value &value) {
                                 doPost);
 
     if (OC_STACK_OK != result) {
-      m_device->postError(async_call_id);
+      m_device->postError("updateResource failed", async_call_id);
       return;
     }
   } else {
-    m_device->postError(async_call_id);
+    m_device->postError("resource not found", async_call_id);
   }
 }

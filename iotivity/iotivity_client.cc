@@ -184,8 +184,8 @@ void IotivityClient::foundDeviceCallback(const OCRepresentation &rep,
     if (rep.getValue("dmv", val)) {
       deviceInfo->m_deviceinfomap["dataModels"] = val;
     }
+
     m_founddevicemap[deviceUUID] = deviceInfo;
-#if IOT828
     // Get platfrom info from host, require IOT-828
     std::string hostUri = rep.getHost();  //  unicast
     std::string platformDiscoveryRequest = "/oic/p";
@@ -206,7 +206,6 @@ void IotivityClient::foundDeviceCallback(const OCRepresentation &rep,
       m_device->postError("OCPlatform::getPlatformInfo", async_call_id);
       return;
     }
-#endif
   } else {
     if (waitsec == -1) {
       findDevicePreparedRequest(value);

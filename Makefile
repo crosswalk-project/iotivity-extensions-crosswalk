@@ -1,5 +1,5 @@
 # IoTivity params
-IOTIVITY_VERSION ?= 1.0.0
+IOTIVITY_VERSION ?= 1.0.1
 ## Set tu tue if need to rebuilt IoTivity
 IOTIVITY_REBUILD ?=
 

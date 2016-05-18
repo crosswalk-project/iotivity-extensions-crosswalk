@@ -32,23 +32,16 @@
 #include "iotivity/iotivity_server.h"
 #include "iotivity/iotivity_client.h"
 
+const std::string DAT_FILE = "oic_xwalk_client.dat";
+const std::string DAT_PATH  = getUserHome() + "/" + DAT_FILE;
+
 #if SECURE
-#include "oxmjustworks.h"
-#include "oxmrandompin.h"
-#include "securevirtualresourcetypes.h"
-#include "srmutility.h"
-#include "pmtypes.h"
-
-const std::string JSON_FILE = "oic_xwalk_client.json";
-const std::string JSON_PATH  = getUserHome() + "/" + JSON_FILE;
-
 FILE* xwalk_client_fopen(const char *path, const char *mode) {
   (void)path;
 
-  std::string CRED_FILE = getUserHome() + "/" + JSON_FILE;
-  const char* credFile = CRED_FILE.c_str();
+  const char* credFile = DAT_PATH.c_str();
 
-  OC_LOG_V(DEBUG, TAG, "#OPEN JSON DB XWALK IOT %s\n", credFile);
+  OIC_LOG_V(DEBUG, TAG, "#OPEN JSON DB XWALK IOT %s\n", credFile);
 
   return fopen(credFile, mode);
 }
@@ -61,7 +54,7 @@ IotivityDeviceInfo::~IotivityDeviceInfo() {}
 std::string IotivityDeviceInfo::hasMap(std::string key) {
   std::map<std::string, std::string>::const_iterator it;
   if ((it = m_deviceinfomap.find(key)) != m_deviceinfomap.end()) {
-    OC_LOG_V(DEBUG, TAG, "Found %s=%s\n", key.c_str(),
+    OIC_LOG_V(DEBUG, TAG, "Found %s=%s\n", key.c_str(),
       m_deviceinfomap[key].c_str());
     return m_deviceinfomap[key];
   }
@@ -71,10 +64,10 @@ std::string IotivityDeviceInfo::hasMap(std::string key) {
 int IotivityDeviceInfo::mapSize() { return m_deviceinfomap.size(); }
 
 void IotivityDeviceInfo::deserialize(const picojson::value& value) {
-  OC_LOG_V(DEBUG, TAG, "IotivityDeviceInfo::deserialize\n");
+  OIC_LOG_V(DEBUG, TAG, "IotivityDeviceInfo::deserialize\n");
   picojson::value properties = value.get("info");
   picojson::object& propertiesobject = properties.get<picojson::object>();
-  OC_LOG_V(DEBUG, TAG, "value: size=%d\n", (int)propertiesobject.size());
+  OIC_LOG_V(DEBUG, TAG, "value: size=%d\n", (int)propertiesobject.size());
 
   m_deviceinfomap.clear();
   for (picojson::value::object::iterator iter = propertiesobject.begin();
@@ -83,7 +76,7 @@ void IotivityDeviceInfo::deserialize(const picojson::value& value) {
     picojson::value objectValue = iter->second;
 
     if (objectValue.is<string>()) {
-      OC_LOG_V(DEBUG, TAG, "[string] key=%s, value=%s\n", objectKey.c_str(),
+      OIC_LOG_V(DEBUG, TAG, "[string] key=%s, value=%s\n", objectKey.c_str(),
                 objectValue.get<string>().c_str());
       m_deviceinfomap[objectKey] = objectValue.get<string>();
     }
@@ -106,7 +99,7 @@ IotivityDeviceSettings::IotivityDeviceSettings() {
 IotivityDeviceSettings::~IotivityDeviceSettings() {}
 
 void IotivityDeviceSettings::deserialize(const picojson::value& value) {
-  OC_LOG_V(DEBUG, TAG, "IotivityDeviceSettings::deserialize\n");
+  OIC_LOG_V(DEBUG, TAG, "IotivityDeviceSettings::deserialize\n");
   if (value.contains("url")) {
     m_url = value.get("url").to_str();
   }
@@ -221,18 +214,21 @@ void IotivityDevice::configure(IotivityDeviceSettings* settings) {
       if (pos != std::string::npos) {
         host = tmp.substr(0, pos);
         std::string portString = tmp.substr(pos + 1, tmp.length());
-        OC_LOG_V(DEBUG, TAG, "host=%s, portString=%s\n", host.c_str(),
+        OIC_LOG_V(DEBUG, TAG, "host=%s, portString=%s\n", host.c_str(),
           portString.c_str());
       }
     }
   }
 
+  if (!file_exist(DAT_PATH.c_str())) {
+      std::cerr << "ERROR:: Missing JSON:" << DAT_PATH << std::endl;
+      OIC_LOG_V(ERROR, TAG, "Missing JSON %s", DAT_PATH);
 #if SECURE
-  if (!file_exist(JSON_PATH.c_str())) {
-      std::cerr << "ERROR:: Missing JSON:" << JSON_PATH << std::endl;
-      // exit(-1);
+      exit(-1);
+#endif
   }
 
+#if SECURE
   static OCPersistentStorage ps = {
     xwalk_client_fopen,
     fread,
@@ -244,13 +240,13 @@ void IotivityDevice::configure(IotivityDeviceSettings* settings) {
   int result = OCRegisterPersistentStorageHandler(&ps);
 
   if (result != OC_STACK_OK) {
-    OC_LOG_V(ERROR, TAG, "OCRegisterPersistentStorageHandler error");
+    OIC_LOG_V(ERROR, TAG, "OCRegisterPersistentStorageHandler error");
     return;
   }
 #endif
 
   if (OCInit(NULL, 0, OC_CLIENT_SERVER) != OC_STACK_OK) {
-    OC_LOG_V(ERROR, TAG, "ERROR OCStack init error");
+    OIC_LOG_V(ERROR, TAG, "ERROR OCStack init error");
     return;
   }
 
@@ -261,19 +257,18 @@ void IotivityDevice::configure(IotivityDeviceSettings* settings) {
 #endif
 
   // 2-Set Platform config
-  /*
   int ctVal = CT_ADAPTER_IP;
   ctVal |= CA_IPV4;
   ctVal |= CA_IPV6;
   OCConnectivityType ct =  (OCConnectivityType) (ctVal);
   cfg.clientConnectivity = ct;
   cfg.serverConnectivity = ct;
-  */
+
   OCPlatform::Configure(cfg);
 
-  OC_LOG_V(DEBUG, TAG, "OCPlatform::Configure: host=%s:%d\n",
+  OIC_LOG_V(DEBUG, TAG, "OCPlatform::Configure: host=%s:%d\n",
     host.c_str(), port);
-  OC_LOG_V(DEBUG, TAG, "modeType=%d, QoS=%d\n", modeType, QoS);
+  OIC_LOG_V(DEBUG, TAG, "modeType=%d, QoS=%d\n", modeType, QoS);
 }
 
 OCStackResult IotivityDevice::configurePlatformInfo(
@@ -281,7 +276,7 @@ OCStackResult IotivityDevice::configurePlatformInfo(
   OCStackResult result = OC_STACK_ERROR;
   OCPlatformInfo platformInfo = {0};
 
-  OC_LOG_V(DEBUG, TAG, "configurePlatformInfo %d\n", deviceInfo.mapSize());
+  OIC_LOG_V(DEBUG, TAG, "configurePlatformInfo %d\n", deviceInfo.mapSize());
 
   if (deviceInfo.mapSize() == 0) {
     // nothing to do
@@ -303,7 +298,7 @@ OCStackResult IotivityDevice::configurePlatformInfo(
   std::string systemTime = deviceInfo.hasMap("systemTime");
   if (systemTime == "") { systemTime = "default"; }
 
-  OC_LOG_V(DEBUG, TAG,
+  OIC_LOG_V(DEBUG, TAG,
     "registerPlatformInfo:\n"
     "\tID:          %s\n"
     "\tmodelNumber: %s\n"
@@ -313,7 +308,7 @@ OCStackResult IotivityDevice::configurePlatformInfo(
     platformID.c_str(), modelNumber.c_str(), manufacturerName.c_str(),
     manufacturerUrl.c_str(), manufactureDate.c_str());
 
-  OC_LOG_V(DEBUG, TAG,
+  OIC_LOG_V(DEBUG, TAG,
     "\tplatform:    %s\n"
     "\tOS:          %s\n"
     "\thw:          %s\n"
@@ -338,13 +333,13 @@ OCStackResult IotivityDevice::configurePlatformInfo(
              supportUrl,
              systemTime);
   if (OC_STACK_OK != result) {
-    OC_LOG_V(ERROR, TAG, "Platform Registration was unsuccessful\n");
+    OIC_LOG_V(ERROR, TAG, "Platform Registration was unsuccessful\n");
     return result;
   }
 
   result = OCPlatform::registerPlatformInfo(platformInfo);
   if (OC_STACK_OK != result) {
-    OC_LOG_V(ERROR, TAG, "OCPlatform::registerPlatformInfo was unsuccessful\n");
+    OIC_LOG_V(ERROR, TAG, "OCPlatform::registerPlatformInfo was unsuccessful\n");
     return result;
   }
 
@@ -358,7 +353,7 @@ OCStackResult IotivityDevice::configureDeviceInfo(
   OCStackResult result = OC_STACK_ERROR;
   OCDeviceInfo oCDeviceInfo = {0};
 
-  OC_LOG_V(DEBUG, TAG, "configureDeviceInfo\n");
+  OIC_LOG_V(DEBUG, TAG, "configureDeviceInfo\n");
 
   if (deviceInfo.mapSize() == 0) {
     // nothing to do
@@ -370,7 +365,7 @@ OCStackResult IotivityDevice::configureDeviceInfo(
   result = SetDeviceInfo(oCDeviceInfo, deviceName);
   result = OCPlatform::registerDeviceInfo(oCDeviceInfo);
   if (OC_STACK_OK != result) {
-    OC_LOG_V(ERROR, TAG, "OCPlatform::registerDeviceInfo was unsuccessful\n");
+    OIC_LOG_V(ERROR, TAG, "OCPlatform::registerDeviceInfo was unsuccessful\n");
     return result;
   }
 
@@ -378,7 +373,7 @@ OCStackResult IotivityDevice::configureDeviceInfo(
 }
 
 void IotivityDevice::handleConfigure(const picojson::value& value) {
-  OC_LOG_V(DEBUG, TAG, "handleConfigure: v=%s\n", value.serialize().c_str());
+  OIC_LOG_V(DEBUG, TAG, "handleConfigure: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
 
@@ -409,7 +404,7 @@ void IotivityDevice::handleConfigure(const picojson::value& value) {
 }
 
 static void systemReboot() {
-  OC_LOG_V(DEBUG, TAG, "systemReboot\n");
+  OIC_LOG_V(DEBUG, TAG, "systemReboot\n");
   // TODO(aphao) Not sure userspace has enough privilege to reboot.
 }
 
@@ -426,13 +421,13 @@ void IotivityDevice::handleReboot(const picojson::value& value) {
 }
 
 void IotivityDevice::PostMessage(const char* msg) {
-  OC_LOG_V(DEBUG, TAG, "[Native==>JS] PostMessage: v=%s\n", msg);
+  OIC_LOG_V(DEBUG, TAG, "[Native==>JS] PostMessage: v=%s\n", msg);
   m_instance->PostMessage(msg);
 }
 
 void IotivityDevice::postResult(const char* completed_operation,
                                 double async_operation_id) {
-  OC_LOG_V(DEBUG, TAG, "postResult: c=%s, id=%f\n", completed_operation,
+  OIC_LOG_V(DEBUG, TAG, "postResult: c=%s, id=%f\n", completed_operation,
             async_operation_id);
 
   picojson::value::object object;
@@ -444,7 +439,7 @@ void IotivityDevice::postResult(const char* completed_operation,
 }
 
 void IotivityDevice::postError(const char* msg, double async_operation_id) {
-  OC_LOG_V(ERROR, TAG, "%s postError: id=%f\n", msg, async_operation_id);
+  OIC_LOG_V(ERROR, TAG, "%s postError: id=%f\n", msg, async_operation_id);
 
   picojson::value::object object;
   object["cmd"] = picojson::value("asyncCallError");

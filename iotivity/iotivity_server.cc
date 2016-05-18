@@ -48,7 +48,7 @@ IotivityResourceServer* IotivityServer::getResourceById(std::string id) {
 }
 
 void IotivityServer::handleRegisterResource(const picojson::value& value) {
-  OC_LOG_V(DEBUG, TAG, "handleRegisterResource: v=%s\n",
+  OIC_LOG_V(DEBUG, TAG, "handleRegisterResource: v=%s\n",
     value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
@@ -74,7 +74,7 @@ void IotivityServer::handleRegisterResource(const picojson::value& value) {
 }
 
 void IotivityServer::handleUnregisterResource(const picojson::value& value) {
-  OC_LOG_V(DEBUG, TAG, "handleUnregisterResource: v=%s\n",
+  OIC_LOG_V(DEBUG, TAG, "handleUnregisterResource: v=%s\n",
     value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
@@ -105,7 +105,7 @@ void IotivityServer::handleUnregisterResource(const picojson::value& value) {
 }
 
 void IotivityServer::handleEnablePresence(const picojson::value& value) {
-  OC_LOG_V(DEBUG, TAG, "handleEnablePresence: v=%s\n",
+  OIC_LOG_V(DEBUG, TAG, "handleEnablePresence: v=%s\n",
     value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
@@ -121,7 +121,7 @@ void IotivityServer::handleEnablePresence(const picojson::value& value) {
 }
 
 void IotivityServer::handleDisablePresence(const picojson::value& value) {
-  OC_LOG_V(DEBUG, TAG, "handleDisablePresence: v=%s\n",
+  OIC_LOG_V(DEBUG, TAG, "handleDisablePresence: v=%s\n",
     value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
@@ -136,7 +136,7 @@ void IotivityServer::handleDisablePresence(const picojson::value& value) {
 }
 
 void IotivityServer::handleNotify(const picojson::value& value) {
-  OC_LOG_V(DEBUG, TAG, "handleNotify: v=%s\n", value.serialize().c_str());
+  OIC_LOG_V(DEBUG, TAG, "handleNotify: v=%s\n", value.serialize().c_str());
 
   double async_call_id = value.get("asyncCallId").get<double>();
   std::string resId = value.get("resourceId").to_str();

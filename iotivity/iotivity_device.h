@@ -34,6 +34,10 @@
 #include <string>
 #include "iotivity/iotivity_tools.h"
 #include "common/extension.h"
+#include "cacommon.h"
+
+/* Switch on when provisioning JS APIs available */
+#define SECURE 1
 
 namespace common {
 class Instance;

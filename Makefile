@@ -1,5 +1,5 @@
 # IoTivity params
-IOTIVITY_VERSION ?= 1.0.1
+IOTIVITY_VERSION ?= 1.1.0
 ## Set tu tue if need to rebuilt IoTivity
 IOTIVITY_REBUILD ?=
 
@@ -29,6 +29,7 @@ IOTIVITY_INC_PATH = -I$(IOTIVITY_BUILD_DIR)/resource/csdk/stack/include/ \
         -I$(IOTIVITY_BUILD_DIR)/resource/c_common \
         -I$(IOTIVITY_BUILD_DIR)/resource/csdk/logger/include \
         -I$(IOTIVITY_BUILD_DIR)/resource/include \
+        -I/usr/include/resource \
         -I/usr/include
 endif
 

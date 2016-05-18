@@ -1,46 +1,98 @@
 {
-    "acl": [
-        {
-            "sub": "Kg==",
-            "rsrc": [
-                "/oic/res",
-                "/oic/res/d",
-                "/oic/d",
-                "/oic/p",
-                "/oic/res/types/d",
-                "/oic/ad",
-                "/oic/sec/acl",
-                "/oic/sec/svc",
-                "/oic/sec/amacl"
-            ],
-            "perms": 2,
-            "ownrs" : ["T0lDX1hXS19DTElFTlRfMQ=="]
+    "acl": {
+        "aclist": {
+            "aces": [
+                {
+                    "subjectuuid": "*",
+                    "resources": [
+                        {
+                            "href": "/oic/res",
+                            "rel": "",
+                            "rt": "",
+                            "if": ""
+                        },{
+                            "href": "/oic/d",
+                            "rel": "",
+                            "rt": "",
+                            "if": ""
+                        },{
+                            "href": "/oic/p",
+                            "rel": "",
+                            "rt": "",
+                            "if": ""
+                        },
+                        {
+                            "href": "/oic/res/d",
+                            "rel": "",
+                            "rt": "",
+                            "if": ""
+                        },
+                        {
+                            "href": "/oic/res/types/d",
+                            "rel": "",
+                            "rt": "",
+                            "if": ""
+                        },
+                        {
+                            "href": "/oic/presence",
+                            "rel": "",
+                            "rt": "",
+                            "if": ""
+                        }
+                    ],
+                    "permission": 2
+                },
+                {
+                    "subjectuuid": "*",
+                    "resources": [
+                        {
+                            "href": "/oic/sec/doxm",
+                            "rel": "",
+                            "rt": "",
+                            "if": ""
+                        },
+                        {
+                            "href": "/oic/sec/pstat",
+                            "rel": "",
+                            "rt": "",
+                            "if": ""
+                        },
+                        {
+                            "href": "/oic/sec/acl",
+                            "rel": "",
+                            "rt": "",
+                            "if": ""
+                        },
+                        {
+                            "href": "/oic/sec/cred",
+                            "rel": "",
+                            "rt": "",
+                            "if": ""
+                        }
+                    ],
+                    "permission": 6
+                }
+            ]
         },
-        {
-            "sub": "Kg==",
-            "rsrc": [
-                "/oic/sec/doxm",
-                "/oic/sec/pstat",
-                "/oic/sec/cred"
-             ],
-             "perms": 6,
-             "ownrs" : ["T0lDX1hXS19DTElFTlRfMQ=="]
-        }
-    ],
-    "pstat":    {
+        "rowneruuid" : "C15C0ABB-776F-726B-4465-765575696430"
+    },
+    "pstat": {
         "isop": false,
-        "deviceid": "T0lDX1hXS19DTElFTlRfMQ==",
-        "ch": 0,
-        "cm": 0,
+        "deviceuuid": "C15C0ABB-776F-726B-4465-765575696430",
+        "rowneruuid": "C15C0ABB-776F-726B-4465-765575696430",
+        "cm": 2,
         "tm": 0,
         "om": 3,
-        "sm": [3]
-    },
+        "sm": 3
+        },
     "doxm": {
-        "oxm":  [0],
+        "oxms": [0],
         "oxmsel": 0,
         "sct": 1,
         "owned": false,
-        "deviceid": "T0lDX1hXS19DTElFTlRfMQ=="
+        "deviceuuid": "C15C0ABB-776F-726B-4465-765575696430",
+        "devowneruuid": "",
+        "rowneruuid": "C15C0ABB-776F-726B-4465-765575696430",
+        "dpc": true
     }
 }
